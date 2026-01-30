@@ -20,7 +20,28 @@
     </nav>
   </div>
 
-  <button mat-stroked-button>
-    Login
-  </button>
+  @if (auth.user$ | async; as user) {
+    <button mat-button [matMenuTriggerFor]="menu">
+      @if (user.photoURL) {
+        <img
+          [src]="user.photoURL"
+          class="w-8 h-8 rounded-full mr-2"
+          alt="profile"
+        />
+      } @else {
+        {{ user.displayName ?? 'Account' }}
+      }
+    </button>
+
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="auth.logout()">
+        Logout
+      </button>
+    </mat-menu>
+  } @else {
+    <button mat-raised-button color="primary"
+            (click)="auth.loginWithGoogle()">
+      Login
+    </button>
+  }
 </mat-toolbar>
