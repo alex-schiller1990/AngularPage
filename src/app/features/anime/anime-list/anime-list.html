@@ -1,1 +1,41 @@
-<p>anime-list works!</p>
+<div class="p-6">
+  <h1 class="text-2xl font-semibold mb-6">Anime</h1>
+
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    @for (anime of anime$ | async; track anime.id) {
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <img
+          [src]="anime.coverURL"
+          [alt]="anime.name"
+          class="w-full h-64 object-cover"
+        />
+
+        <div class="p-4 space-y-1">
+          <h2 class="font-semibold leading-tight">
+            {{ anime.name }}
+          </h2>
+
+          <p class="text-sm text-gray-500">
+            {{ anime.releaseYear }}
+          </p>
+
+          <p class="text-sm">
+            Status: <span class="font-medium">{{ anime.status }}</span>
+          </p>
+
+          <p class="text-sm">
+            Progress: {{ anime.progress }}
+          </p>
+
+          <p class="text-sm">
+            {{ anime.startDate }} – {{ anime.endDate }}
+          </p>
+
+          <p class="text-sm font-medium">
+            ⭐ {{ anime.rating }}/10
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+</div>
