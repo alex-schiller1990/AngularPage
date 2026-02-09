@@ -7,8 +7,8 @@
       Ogromm
     </span>
 
-    <nav class="flex gap-4">
-      <a mat-button routerLink="/" routerLinkActive="font-bold">
+    <nav class="flex gap-4" aria-label="Main navigation">
+      <a mat-button routerLink="/" routerLinkActive="font-bold" [routerLinkActiveOptions]="{ exact: true }">
         Home
       </a>
       <a mat-button routerLink="/anime" routerLinkActive="font-bold">
@@ -29,12 +29,16 @@
           alt="profile"
         />
       } @else {
-        {{ user.displayName ?? 'Account' }}
+        <div
+          class="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center text-sm"
+        >
+          {{ user.displayName?.[0] ?? 'U' }}
+        </div>
       }
     </button>
 
     <mat-menu #menu="matMenu">
-      <button mat-menu-item (click)="auth.logout()">
+      <button mat-menu-item (click)="auth.logout()" aria-label="Logout">
         Logout
       </button>
     </mat-menu>
