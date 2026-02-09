@@ -20,7 +20,7 @@
     </nav>
   </div>
 
-  @if (auth.user$ | async; as user) {
+  @if (auth.user(); as user) {
     <button mat-button [matMenuTriggerFor]="menu">
       @if (user.photoURL) {
         <img
