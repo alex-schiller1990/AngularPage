@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { getFirestore, collection, getDocs, doc, getDoc} from 'firebase/firestore';
-import {combineLatest, from, Observable} from 'rxjs';
+import { getFirestore, collection, doc} from 'firebase/firestore';
+import {combineLatest, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import { Anime } from './anime.model';
 import { initializeApp } from 'firebase/app';
 import {environment} from '../../../environments/environment';
 import {AnimeDetail} from './anime-detail.model';
-import { docData$ } from '../../core/firestore.utils';
+import { collectionData$, docData$ } from '../../core/firestore.utils';
 
 @Injectable({ providedIn: 'root' })
 export class AnimeService {
@@ -15,11 +15,7 @@ export class AnimeService {
 
   getAll(): Observable<Anime[]> {
     const col = collection(this.db, 'Anime');
-    return from(getDocs(col)).pipe(
-      map(snapshot =>
-        snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Anime))
-      )
-    );
+    return collectionData$<Anime>(col);
   }
 
   getByIdWithDetails(animeId: string): Observable<Anime & { details: AnimeDetail }> {
