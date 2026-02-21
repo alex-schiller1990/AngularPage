@@ -1,34 +1,34 @@
-@if (anime$()) {
+@if (anime(); as a) {
   <mat-card class="max-w-4xl mx-auto p-6 mt-6">
     <div class="flex gap-6">
-      <img [src]="anime$()?.coverURL" class="w-48 h-auto rounded" alt="{{ anime$()?.name }}" />
+      <img [src]="a.coverURL" class="w-48 h-auto rounded" alt="{{ a.name }}" />
 
       <div class="flex-1">
-        <h1 class="text-2xl font-bold">{{ anime$()?.name }}</h1>
-        <p class="text-gray-500 mb-2">Released: {{ anime$()?.releaseYear }}</p>
-        <p>Status: {{ anime$()?.status }}</p>
-        <p>Progress: {{ anime$()?.progress }}</p>
-        <p>Start/End: {{ anime$()?.startDate }} – {{ anime$()?.endDate }}</p>
-        <p>Rating: {{ anime$()?.rating }}/10</p>
+        <h1 class="text-2xl font-bold">{{ a.name }}</h1>
+        <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
+        <p>Status: {{ a.status }}</p>
+        <p>Progress: {{ a.progress }}</p>
+        <p>Start/End: {{ a.startDate }} – {{ a.endDate }}</p>
+        <p>Rating: {{ a.rating }}/10</p>
 
-        @if (anime$()?.details?.description) {
+        @if (a.details.description) {
           <section>
             <h2 class="text-xl font-semibold mt-4">Description</h2>
-            <p [innerHTML]="anime$()?.details?.description"></p>
+            <p [innerHTML]="a.details?.description"></p>
           </section>
         }
 
-        @if (anime$()?.details?.opinion) {
+        @if (a.details.opinion) {
           <section>
             <h2 class="text-xl font-semibold mt-4">Opinion</h2>
-            <p [innerHTML]="anime$()?.details?.opinion"></p>
+            <p [innerHTML]="a.details?.opinion"></p>
           </section>
         }
 
-        @if (anime$()?.details?.trivia) {
+        @if (a.details.trivia) {
           <section>
             <h2 class="text-xl font-semibold mt-4">Trivia</h2>
-            <p [innerHTML]="anime$()?.details?.trivia"></p>
+            <p [innerHTML]="a.details?.trivia"></p>
           </section>
         }
       </div>
