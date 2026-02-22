@@ -1,1 +1,45 @@
-<p>games-list works!</p>
+<div class="p-6">
+  <h1 class="text-2xl font-semibold mb-6">Games</h1>
+
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    @for (game of sortedGames(); track game.id) {
+      <a [routerLink]="['/games', game.title]" class="block bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
+        <img
+          [src]="game.coverURL"
+          [alt]="game.name"
+          class="w-full h-64 object-cover"
+        />
+
+        <div class="p-4 space-y-1">
+          <h2 class="font-semibold leading-tight">
+            {{ game.name }}
+          </h2>
+
+          <p class="text-sm text-gray-500">
+            {{ game.releaseYear }} · {{ game.platform }}
+          </p>
+
+          <p class="text-sm">
+            Status: <span class="font-medium">{{ game.status }}</span>
+          </p>
+
+          @if (game.progress) {
+            <p class="text-sm">
+              Progress: {{ game.progress }}
+            </p>
+          }
+
+          <p class="text-sm">
+            {{ game.startDate }}{{ game.endDate ? ' – ' + game.endDate : '' }}
+          </p>
+
+          @if (game.rating) {
+            <p class="text-sm font-medium">
+              ⭐ {{ game.rating }}/10
+            </p>
+          }
+        </div>
+      </a>
+    }
+  </div>
+</div>
