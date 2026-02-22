@@ -8,7 +8,16 @@
         <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
         <p>Status: {{ a.status }}</p>
         <p>Progress: {{ a.progress }}</p>
-        <p>Start/End: {{ a.startDate }} – {{ a.endDate }}</p>
+        <p>Start/End: {{ a.startDate }}{{ a.endDate ? ' – ' + a.endDate : '' }}</p>
+        @if (a.additionalDates?.length) {
+          <p class="text-sm text-gray-600 mt-1">
+            Additional:
+            @for (ad of a.additionalDates; track $index) {
+              <span>{{ ad.dateComment }}: {{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
+              @if (!$last) { <span class="mx-1">·</span> }
+            }
+          </p>
+        }
         <p>Rating: {{ a.rating }}/10</p>
 
         @if (a.details.description) {

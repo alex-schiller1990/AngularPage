@@ -2,7 +2,7 @@
   <h1 class="text-2xl font-semibold mb-6">Anime</h1>
 
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-    @for (anime of animeService.list(); track anime.id) {
+    @for (anime of sortedAnime(); track anime.id) {
       <a [routerLink]="['/anime', anime.id]" class="block bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
         <img
           [src]="anime.coverURL"
@@ -28,7 +28,7 @@
           </p>
 
           <p class="text-sm">
-            {{ anime.startDate }} – {{ anime.endDate }}
+            {{ anime.startDate }}{{ anime.endDate ? ' – ' + anime.endDate : '' }}
           </p>
 
           <p class="text-sm font-medium">
