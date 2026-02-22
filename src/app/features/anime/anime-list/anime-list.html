@@ -3,7 +3,7 @@
 
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
     @for (anime of animeService.list(); track anime.id) {
-      <div class="bg-white rounded-lg shadow overflow-hidden">
+      <a [routerLink]="['/anime', anime.id]" class="block bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
         <img
           [src]="anime.coverURL"
           [alt]="anime.name"
@@ -35,7 +35,7 @@
             ⭐ {{ anime.rating }}/10
           </p>
         </div>
-      </div>
+      </a>
     }
   </div>
 </div>
