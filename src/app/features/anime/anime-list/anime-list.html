@@ -3,7 +3,7 @@
 
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
     @for (anime of sortedAnime(); track anime.id) {
-      <a [routerLink]="['/anime', anime.id]" class="block bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
+      <a [routerLink]="['/anime', anime.title]" class="block bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
         <img
           [src]="anime.coverURL"
           [alt]="anime.name"

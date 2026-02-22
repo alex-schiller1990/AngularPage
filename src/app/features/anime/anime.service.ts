@@ -1,7 +1,7 @@
 import { Injectable, signal, Signal } from '@angular/core';
-import { getFirestore, collection, doc } from 'firebase/firestore';
-import { combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { getFirestore, collection, doc, query, where, limit } from 'firebase/firestore';
+import { of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { Anime } from './anime.model';
 import { initializeApp } from 'firebase/app';
 import { environment } from '../../../environments/environment';
@@ -18,26 +18,28 @@ export class AnimeService {
   /** List of all anime. Cached in-memory; single Firestore listener. */
   readonly list = toSignal(collectionData$<Anime>(this.col), { initialValue: [] as Anime[] });
 
-  private readonly detailCache = new Map<string, Signal<AnimeWithDetails>>();
+  private readonly detailByTitleCache = new Map<string, Signal<AnimeWithDetails>>();
 
-  /** Anime with details by id. Cached per document ID; one listener per id. */
-  getAnimeWithDetails(animeId: string): Signal<AnimeWithDetails> {
-    let cached = this.detailCache.get(animeId);
+  /** Anime with details by title. Queries Firebase by title, then loads main doc + Details. Cached per title. */
+  getAnimeWithDetailsByTitle(title: string): Signal<AnimeWithDetails> {
+    let cached = this.detailByTitleCache.get(title);
     if (cached) return cached;
 
-    const mainDocRef = doc(this.db, 'Anime', animeId);
-    const detailsRef = doc(this.db, 'Anime', animeId, 'Details', 'Details');
-
-    const stream = combineLatest([
-      docData$<Anime>(mainDocRef),
-      docData$<AnimeDetail>(detailsRef),
-    ]).pipe(
-      map(([anime, details]) => ({ ...anime, details }))
+    const q = query(this.col, where('title', '==', title), limit(1));
+    const stream = collectionData$<Anime>(q).pipe(
+      switchMap(animeList => {
+        if (animeList.length === 0) return of(null);
+        const anime = animeList[0];
+        const detailsRef = doc(this.db, 'Anime', anime.id, 'Details', 'Details');
+        return docData$<AnimeDetail>(detailsRef).pipe(
+          map(details => ({ ...anime, details }))
+        );
+      })
     );
 
     const sig = signal<AnimeWithDetails>(null);
     stream.subscribe(value => sig.set(value));
-    this.detailCache.set(animeId, sig);
+    this.detailByTitleCache.set(title, sig);
     return sig;
   }
 }

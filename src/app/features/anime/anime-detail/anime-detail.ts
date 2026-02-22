@@ -16,10 +16,11 @@ export class AnimeDetail {
   private readonly animeService = inject(AnimeService);
 
   private readonly paramMap = toSignal(this.route.paramMap);
-  private readonly id = computed(() => this.paramMap()?.get('id') ?? null);
+  /** URL param is the anime title (e.g. /anime/abc → title 'abc'). */
+  private readonly titleParam = computed(() => this.paramMap()?.get('id') ?? null);
   private readonly animeSignal = computed(() => {
-    const id = this.id();
-    return typeof id === 'string' ? this.animeService.getAnimeWithDetails(id) : null;
+    const title = this.titleParam();
+    return typeof title === 'string' ? this.animeService.getAnimeWithDetailsByTitle(title) : null;
   });
 
   /** Flattened anime with details for the current route id. */
