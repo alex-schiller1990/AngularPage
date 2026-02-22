@@ -1,18 +1,16 @@
-import { Injectable, signal, Signal } from '@angular/core';
-import { getFirestore, collection, doc, query, where, limit } from 'firebase/firestore';
+import { inject, Injectable, signal, Signal } from '@angular/core';
+import { Firestore } from '@angular/fire/firestore';
+import { collection, doc, limit, query, where } from 'firebase/firestore';
 import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Anime } from './anime.model';
-import { initializeApp } from 'firebase/app';
-import { environment } from '../../../environments/environment';
 import { AnimeDetail, AnimeWithDetails } from './anime-detail.model';
 import { collectionData$, docData$ } from '../../core/firestore.utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
 export class AnimeService {
-  private readonly app = initializeApp(environment.firebase);
-  private readonly db = getFirestore(this.app);
+  private readonly db = inject(Firestore);
   private readonly col = collection(this.db, 'Anime');
 
   /** List of all anime. Cached in-memory; single Firestore listener. */
