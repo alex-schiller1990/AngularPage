@@ -1,6 +1,5 @@
-import {Component, inject} from '@angular/core';
-import {AnimeService} from '../anime.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject } from '@angular/core';
+import { AnimeService } from '../anime.service';
 
 @Component({
   selector: 'app-anime-list',
@@ -10,10 +9,5 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: true
 })
 export class AnimeList {
-
-  private readonly animeService = inject(AnimeService);
-  readonly anime = toSignal(
-    this.animeService.getAll(),
-    { initialValue: [] }
-  );
+  protected readonly animeService = inject(AnimeService);
 }
