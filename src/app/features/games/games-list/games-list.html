@@ -23,6 +23,155 @@
       }
     </div>
 
+    <div #filtersContainer class="flex flex-wrap items-start gap-2">
+      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
+        <summary
+          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          role="button"
+          aria-haspopup="listbox"
+        >
+          <span>Status @if (getSelectedCount(selectedStatuses()) > 0) { ({{ getSelectedCount(selectedStatuses()) }}) }</span>
+          <span class="text-xs text-gray-500">v</span>
+        </summary>
+        <div class="absolute z-10 mt-1 w-56 rounded-md border border-gray-200 bg-white p-2 shadow-lg">
+          @for (status of statusOptions(); track status) {
+            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
+              <input
+                type="checkbox"
+                [checked]="isStatusSelected(status)"
+                (change)="toggleStatus(status)"
+              />
+              <span>{{ formatStatusLabel(status) }} ({{ getOptionCount(statusFacetCounts(), status) }})</span>
+            </label>
+          }
+        </div>
+      </details>
+
+      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
+        <summary
+          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          role="button"
+          aria-haspopup="listbox"
+        >
+          <span>Rating @if (getSelectedCount(selectedRatings()) > 0) { ({{ getSelectedCount(selectedRatings()) }}) }</span>
+          <span class="text-xs text-gray-500">v</span>
+        </summary>
+        <div class="absolute z-10 mt-1 w-40 rounded-md border border-gray-200 bg-white p-2 shadow-lg">
+          @for (rating of ratingOptions(); track rating) {
+            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
+              <input
+                type="checkbox"
+                [checked]="isRatingSelected(rating)"
+                (change)="toggleRating(rating)"
+              />
+              <span>{{ rating }} ({{ getOptionCount(ratingFacetCounts(), rating) }})</span>
+            </label>
+          }
+        </div>
+      </details>
+
+      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
+        <summary
+          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          role="button"
+          aria-haspopup="listbox"
+        >
+          <span>Release year @if (getSelectedCount(selectedReleaseYears()) > 0) { ({{ getSelectedCount(selectedReleaseYears()) }}) }</span>
+          <span class="text-xs text-gray-500">v</span>
+        </summary>
+        <div class="absolute z-10 mt-1 max-h-72 w-44 overflow-y-auto rounded-md border border-gray-200 bg-white p-2 shadow-lg">
+          @for (releaseYear of releaseYearOptions(); track releaseYear) {
+            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
+              <input
+                type="checkbox"
+                [checked]="isReleaseYearSelected(releaseYear)"
+                (change)="toggleReleaseYear(releaseYear)"
+              />
+              <span>{{ releaseYear }} ({{ getOptionCount(releaseYearFacetCounts(), releaseYear) }})</span>
+            </label>
+          }
+        </div>
+      </details>
+
+      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
+        <summary
+          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          role="button"
+          aria-haspopup="listbox"
+        >
+          <span>Played year @if (getSelectedCount(selectedPlayedYears()) > 0) { ({{ getSelectedCount(selectedPlayedYears()) }}) }</span>
+          <span class="text-xs text-gray-500">v</span>
+        </summary>
+        <div class="absolute z-10 mt-1 max-h-72 w-44 overflow-y-auto rounded-md border border-gray-200 bg-white p-2 shadow-lg">
+          @for (playedYear of playedYearOptions(); track playedYear) {
+            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
+              <input
+                type="checkbox"
+                [checked]="isPlayedYearSelected(playedYear)"
+                (change)="togglePlayedYear(playedYear)"
+              />
+              <span>{{ playedYear }} ({{ getOptionCount(playedYearFacetCounts(), playedYear) }})</span>
+            </label>
+          }
+        </div>
+      </details>
+
+      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
+        <summary
+          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          role="button"
+          aria-haspopup="listbox"
+        >
+          <span>Platform @if (getSelectedCount(selectedPlatforms()) > 0) { ({{ getSelectedCount(selectedPlatforms()) }}) }</span>
+          <span class="text-xs text-gray-500">v</span>
+        </summary>
+        <div class="absolute z-10 mt-1 max-h-72 w-52 overflow-y-auto rounded-md border border-gray-200 bg-white p-2 shadow-lg">
+          @for (platform of platformOptions(); track platform) {
+            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
+              <input
+                type="checkbox"
+                [checked]="isPlatformSelected(platform)"
+                (change)="togglePlatform(platform)"
+              />
+              <span>{{ platform }} ({{ getOptionCount(platformFacetCounts(), platform) }})</span>
+            </label>
+          }
+        </div>
+      </details>
+
+      @if (
+        searchQuery() ||
+        getSelectedCount(selectedStatuses()) > 0 ||
+        getSelectedCount(selectedRatings()) > 0 ||
+        getSelectedCount(selectedReleaseYears()) > 0 ||
+        getSelectedCount(selectedPlayedYears()) > 0 ||
+        getSelectedCount(selectedPlatforms()) > 0
+      ) {
+        <button
+          type="button"
+          (click)="clearAllFilters(); searchInput.value = ''"
+          class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+        >
+          Clear all
+        </button>
+      }
+    </div>
+
+    @if (activeFilterChips().length > 0) {
+      <div class="flex flex-wrap items-center gap-2 pt-1">
+        @for (chip of activeFilterChips(); track chip.type + '-' + chip.value) {
+          <button
+            type="button"
+            (click)="removeFilterChip(chip); searchInput.value = searchQuery()"
+            class="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 hover:bg-gray-50"
+            [attr.aria-label]="'Remove filter ' + chip.label"
+          >
+            {{ chip.label }} x
+          </button>
+        }
+      </div>
+    }
+
     <p class="text-sm text-gray-500">
       {{ filteredGames().length }} result{{ filteredGames().length === 1 ? '' : 's' }}
     </p>
