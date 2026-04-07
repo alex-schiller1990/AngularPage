@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { CollectionReference, DocumentData, DocumentReference, onSnapshot, Query } from 'firebase/firestore';
+import { CollectionReference, DocumentData, DocumentReference, onSnapshot, Query } from '@angular/fire/firestore';
 
 export function docData$<T>(ref: DocumentReference): Observable<T> {
   return new Observable<T>(subscriber => {

@@ -1,27 +1,26 @@
-import { Injectable, signal, Signal } from '@angular/core';
-import { getFirestore, collection, doc, query, where, limit } from 'firebase/firestore';
+import { inject, Injectable, signal, Signal } from '@angular/core';
+import { collection, doc, Firestore, limit, query, where } from '@angular/fire/firestore';
 import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { initializeApp } from 'firebase/app';
-import { environment } from '../../../environments/environment';
 import { collectionData$, docData$ } from '../../core/firestore.utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Game } from './game.model';
 import { GameDetail, GameWithDetails } from './game-detail.model';
 
+const COLLECTION_ID = 'Games';
+
 @Injectable({ providedIn: 'root' })
 export class GamesService {
-  private readonly app = initializeApp(environment.firebase);
-  private readonly db = getFirestore(this.app);
-  private readonly col = collection(this.db, 'Games');
+  private readonly db = inject(Firestore);
+  private readonly col = collection(this.db, COLLECTION_ID);
 
   /** List of all games. Cached in-memory; single Firestore listener. */
   readonly list = toSignal(collectionData$<Game>(this.col), { initialValue: [] as Game[] });
 
-  private readonly detailByTitleCache = new Map<string, Signal<GameWithDetails>>();
+  private readonly detailByTitleCache = new Map<string, Signal<GameWithDetails | null>>();
 
   /** Game with details by title. Queries Firebase by title, then loads main doc + Details. Cached per title. */
-  getGameWithDetailsByTitle(title: string): Signal<GameWithDetails> {
+  getGameWithDetailsByTitle(title: string): Signal<GameWithDetails | null> {
     let cached = this.detailByTitleCache.get(title);
     if (cached) return cached;
 
@@ -30,14 +29,14 @@ export class GamesService {
       switchMap(gameList => {
         if (gameList.length === 0) return of(null);
         const game = gameList[0];
-        const detailsRef = doc(this.db, 'Games', game.id, 'Details', 'Details');
+        const detailsRef = doc(this.db, COLLECTION_ID, game.id, 'Details', 'Details');
         return docData$<GameDetail>(detailsRef).pipe(
           map(details => ({ ...game, details }))
         );
       })
     );
 
-    const sig = signal<GameWithDetails>(null);
+    const sig = signal<GameWithDetails | null>(null);
     stream.subscribe(value => sig.set(value));
     this.detailByTitleCache.set(title, sig);
     return sig;
