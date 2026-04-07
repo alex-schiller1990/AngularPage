@@ -1,6 +1,5 @@
 import { AdditionalDate } from './additional-date.model';
 
-const UNKNOWN_PATTERN = /^\?\?\.\?\?\.\?\?\?\?$/;
 const DATE_PATTERN = /^(\d{2})\.(\d{2})\.(\d{4})$/;
 
 /**
@@ -8,9 +7,10 @@ const DATE_PATTERN = /^(\d{2})\.(\d{2})\.(\d{4})$/;
  * Returns 0 for unknown dates (??.??.????) or invalid strings so they sort last when ordering by newest first.
  */
 export function parseDateToTimestamp(value: string | undefined): number {
-  if (value == null || value === '' || UNKNOWN_PATTERN.test(value.trim())) {
+  if (value == null || value === '') {
     return 0;
   }
+  value = value.replaceAll('?', '0');
   const m = value.trim().match(DATE_PATTERN);
   if (!m) return 0;
   const [, day, month, year] = m;
