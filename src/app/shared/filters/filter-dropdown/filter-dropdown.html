@@ -1,0 +1,29 @@
+<details class="relative" (toggle)="onToggle($event)">
+  <summary
+    class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+    role="button"
+    aria-haspopup="listbox"
+  >
+    <span>{{ label() }} @if (selectedCount() > 0) { ({{ selectedCount() }}) }</span>
+    <span class="text-xs text-gray-500">v</span>
+  </summary>
+
+  <div
+    class="absolute z-10 mt-1 max-h-72 overflow-y-auto rounded-md border border-gray-200 bg-white p-2 shadow-lg"
+    [class.w-40]="panelWidthClass() === 'w-40'"
+    [class.w-44]="panelWidthClass() === 'w-44'"
+    [class.w-52]="panelWidthClass() === 'w-52'"
+    [class.w-56]="panelWidthClass() === 'w-56'"
+  >
+    @for (option of options(); track option.value) {
+      <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
+        <input
+          type="checkbox"
+          [checked]="option.selected"
+          (change)="onOptionChange(option.value)"
+        />
+        <span>{{ option.label }} ({{ option.count }})</span>
+      </label>
+    }
+  </div>
+</details>

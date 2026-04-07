@@ -1,18 +1,22 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { getNewestDateTimestamp } from '../../../core/date-sort.utils';
+import {
+  getCoveredYears,
+  getSortedUniqueValues,
+  matchesAnySelection,
+  removeValueFromSet,
+  toggleValueInSet
+} from '../../../core/filter.utils';
+import { ActiveFilterChipsComponent } from '../../../shared/filters/active-filter-chips/active-filter-chips';
+import { FilterDropdownComponent } from '../../../shared/filters/filter-dropdown/filter-dropdown';
+import { ActiveFilterChip, FilterOption } from '../../../shared/filters/filter.models';
 import { GamesService } from '../games.service';
 import { Game } from '../game.model';
 
-interface ActiveFilterChip {
-  type: 'search' | 'status' | 'rating' | 'releaseYear' | 'playedYear' | 'platform';
-  value: string;
-  label: string;
-}
-
 @Component({
   selector: 'app-games-list',
-  imports: [RouterLink],
+  imports: [RouterLink, FilterDropdownComponent, ActiveFilterChipsComponent],
   templateUrl: './games-list.html',
   styleUrl: './games-list.css',
   standalone: true
@@ -42,15 +46,15 @@ export class GamesList {
   });
 
   protected readonly statusOptions = computed(() =>
-    this.getSortedUniqueValues(this.sortedGames().map((game: Game) => game.status))
+    getSortedUniqueValues(this.sortedGames().map((game: Game) => game.status))
   );
 
   protected readonly ratingOptions = computed(() =>
-    this.getSortedUniqueValues(this.sortedGames().map((game: Game) => game.rating), true)
+    getSortedUniqueValues(this.sortedGames().map((game: Game) => game.rating), true)
   );
 
   protected readonly releaseYearOptions = computed(() =>
-    this.getSortedUniqueValues(this.sortedGames().map((game: Game) => game.releaseYear), true)
+    getSortedUniqueValues(this.sortedGames().map((game: Game) => game.releaseYear), true)
   );
 
   protected readonly playedYearOptions = computed(() => {
@@ -60,11 +64,11 @@ export class GamesList {
         years.add(year);
       }
     }
-    return this.getSortedUniqueValues(Array.from(years), true);
+    return getSortedUniqueValues(Array.from(years), true);
   });
 
   protected readonly platformOptions = computed(() =>
-    this.getSortedUniqueValues(this.sortedGames().flatMap((game: Game) => this.getPlatformValues(game.platform)))
+    getSortedUniqueValues(this.sortedGames().flatMap((game: Game) => this.getPlatformValues(game.platform)))
   );
 
   protected readonly statusFacetCounts = computed(() => this.getFacetCounts('status'));
@@ -72,6 +76,46 @@ export class GamesList {
   protected readonly releaseYearFacetCounts = computed(() => this.getFacetCounts('releaseYear'));
   protected readonly playedYearFacetCounts = computed(() => this.getFacetCounts('playedYear'));
   protected readonly platformFacetCounts = computed(() => this.getFacetCounts('platform'));
+  protected readonly statusFilterOptions = computed<FilterOption[]>(() =>
+    this.statusOptions().map((status) => ({
+      value: status,
+      label: this.formatStatusLabel(status),
+      count: this.statusFacetCounts().get(status) ?? 0,
+      selected: this.selectedStatuses().has(status)
+    }))
+  );
+  protected readonly ratingFilterOptions = computed<FilterOption[]>(() =>
+    this.ratingOptions().map((rating) => ({
+      value: rating,
+      label: rating,
+      count: this.ratingFacetCounts().get(rating) ?? 0,
+      selected: this.selectedRatings().has(rating)
+    }))
+  );
+  protected readonly releaseYearFilterOptions = computed<FilterOption[]>(() =>
+    this.releaseYearOptions().map((releaseYear) => ({
+      value: releaseYear,
+      label: releaseYear,
+      count: this.releaseYearFacetCounts().get(releaseYear) ?? 0,
+      selected: this.selectedReleaseYears().has(releaseYear)
+    }))
+  );
+  protected readonly playedYearFilterOptions = computed<FilterOption[]>(() =>
+    this.playedYearOptions().map((playedYear) => ({
+      value: playedYear,
+      label: playedYear,
+      count: this.playedYearFacetCounts().get(playedYear) ?? 0,
+      selected: this.selectedPlayedYears().has(playedYear)
+    }))
+  );
+  protected readonly platformFilterOptions = computed<FilterOption[]>(() =>
+    this.platformOptions().map((platform) => ({
+      value: platform,
+      label: platform,
+      count: this.platformFacetCounts().get(platform) ?? 0,
+      selected: this.selectedPlatforms().has(platform)
+    }))
+  );
   protected readonly activeFilterChips = computed<ActiveFilterChip[]>(() => {
     const chips: ActiveFilterChip[] = [];
     const query = this.searchQuery().trim();
@@ -103,51 +147,27 @@ export class GamesList {
   });
 
   protected toggleStatus(value: string): void {
-    this.selectedStatuses.update((selected) => this.toggleValueInSet(selected, value));
+    this.selectedStatuses.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected toggleRating(value: string): void {
-    this.selectedRatings.update((selected) => this.toggleValueInSet(selected, value));
+    this.selectedRatings.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected toggleReleaseYear(value: string): void {
-    this.selectedReleaseYears.update((selected) => this.toggleValueInSet(selected, value));
+    this.selectedReleaseYears.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected togglePlayedYear(value: string): void {
-    this.selectedPlayedYears.update((selected) => this.toggleValueInSet(selected, value));
+    this.selectedPlayedYears.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected togglePlatform(value: string): void {
-    this.selectedPlatforms.update((selected) => this.toggleValueInSet(selected, value));
-  }
-
-  protected isStatusSelected(value: string): boolean {
-    return this.selectedStatuses().has(value);
-  }
-
-  protected isRatingSelected(value: string): boolean {
-    return this.selectedRatings().has(value);
-  }
-
-  protected isReleaseYearSelected(value: string): boolean {
-    return this.selectedReleaseYears().has(value);
-  }
-
-  protected isPlayedYearSelected(value: string): boolean {
-    return this.selectedPlayedYears().has(value);
-  }
-
-  protected isPlatformSelected(value: string): boolean {
-    return this.selectedPlatforms().has(value);
+    this.selectedPlatforms.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected getSelectedCount(values: Set<string>): number {
     return values.size;
-  }
-
-  protected getOptionCount(counts: Map<string, number>, value: string): number {
-    return counts.get(value) ?? 0;
   }
 
   protected clearAllFilters(): void {
@@ -166,26 +186,26 @@ export class GamesList {
     }
 
     if (chip.type === 'status') {
-      this.selectedStatuses.update((selected) => this.removeValueFromSet(selected, chip.value));
+      this.selectedStatuses.update((selected) => removeValueFromSet(selected, chip.value));
       return;
     }
 
     if (chip.type === 'rating') {
-      this.selectedRatings.update((selected) => this.removeValueFromSet(selected, chip.value));
+      this.selectedRatings.update((selected) => removeValueFromSet(selected, chip.value));
       return;
     }
 
     if (chip.type === 'releaseYear') {
-      this.selectedReleaseYears.update((selected) => this.removeValueFromSet(selected, chip.value));
+      this.selectedReleaseYears.update((selected) => removeValueFromSet(selected, chip.value));
       return;
     }
 
     if (chip.type === 'playedYear') {
-      this.selectedPlayedYears.update((selected) => this.removeValueFromSet(selected, chip.value));
+      this.selectedPlayedYears.update((selected) => removeValueFromSet(selected, chip.value));
       return;
     }
 
-    this.selectedPlatforms.update((selected) => this.removeValueFromSet(selected, chip.value));
+    this.selectedPlatforms.update((selected) => removeValueFromSet(selected, chip.value));
   }
 
   protected formatStatusLabel(status: string): string {
@@ -217,25 +237,6 @@ export class GamesList {
         detailElement.removeAttribute('open');
       }
     }
-  }
-
-  private getSortedUniqueValues(
-    values: Array<string | undefined | null>,
-    sortDescendingAsNumber = false
-  ): string[] {
-    const uniqueValues = Array.from(
-      new Set(
-        values
-          .filter((value): value is string => typeof value === 'string')
-          .map((value: string) => value.trim())
-          .filter((value: string) => value !== '')
-      )
-    );
-
-    if (sortDescendingAsNumber) {
-      return uniqueValues.sort((a: string, b: string) => Number(b) - Number(a));
-    }
-    return uniqueValues.sort((a: string, b: string) => a.localeCompare(b));
   }
 
   private getFacetCounts(
@@ -293,74 +294,38 @@ export class GamesList {
     if (!matchesSearch) return false;
 
     const matchesStatus =
-      ignoreFilter === 'status' || this.matchesAnySelection(this.selectedStatuses(), game.status);
+      ignoreFilter === 'status' || matchesAnySelection(this.selectedStatuses(), game.status);
     if (!matchesStatus) return false;
 
     const matchesRating =
-      ignoreFilter === 'rating' || this.matchesAnySelection(this.selectedRatings(), game.rating);
+      ignoreFilter === 'rating' || matchesAnySelection(this.selectedRatings(), game.rating);
     if (!matchesRating) return false;
 
     const matchesReleaseYear =
       ignoreFilter === 'releaseYear' ||
-      this.matchesAnySelection(this.selectedReleaseYears(), game.releaseYear);
+      matchesAnySelection(this.selectedReleaseYears(), game.releaseYear);
     if (!matchesReleaseYear) return false;
 
     if (ignoreFilter !== 'playedYear') {
       const playedYears = this.playedYearsByGameId().get(game.id) ?? new Set<string>();
-      const matchesPlayedYear = this.matchesAnySelection(this.selectedPlayedYears(), playedYears);
+      const matchesPlayedYear = matchesAnySelection(this.selectedPlayedYears(), playedYears);
       if (!matchesPlayedYear) return false;
     }
 
     const gamePlatforms = new Set(this.getPlatformValues(game.platform));
     const matchesPlatform =
-      ignoreFilter === 'platform' || this.matchesAnySelection(this.selectedPlatforms(), gamePlatforms);
+      ignoreFilter === 'platform' || matchesAnySelection(this.selectedPlatforms(), gamePlatforms);
     return matchesPlatform;
   }
 
-  private matchesAnySelection(
-    selectedValues: Set<string>,
-    value: string | number | Set<string> | undefined | null
-  ): boolean {
-    if (selectedValues.size === 0) return true;
-    if (value == null) return false;
-
-    if (typeof value === 'string' || typeof value === 'number') {
-      return selectedValues.has(String(value).trim());
-    }
-
-    if (!(value instanceof Set)) return false;
-
-    for (const selected of selectedValues) {
-      if (value.has(selected)) return true;
-    }
-    return false;
-  }
-
-  private toggleValueInSet(currentSet: Set<string>, value: string): Set<string> {
-    const nextSet = new Set(currentSet);
-    if (nextSet.has(value)) {
-      nextSet.delete(value);
-    } else {
-      nextSet.add(value);
-    }
-    return nextSet;
-  }
-
-  private removeValueFromSet(currentSet: Set<string>, value: string): Set<string> {
-    const nextSet = new Set(currentSet);
-    nextSet.delete(value);
-    return nextSet;
-  }
-
   private getPlayedYears(game: Game): Set<string> {
-    const playedYears = new Set<string>();
-
-    this.addYearsFromRange(game.startDate, game.endDate, playedYears);
-    for (const additionalDate of game.additionalDates ?? []) {
-      this.addYearsFromRange(additionalDate.startDate, additionalDate.endDate, playedYears);
-    }
-
-    return playedYears;
+    return getCoveredYears([
+      { startDate: game.startDate, endDate: game.endDate },
+      ...(game.additionalDates ?? []).map((additionalDate) => ({
+        startDate: additionalDate.startDate,
+        endDate: additionalDate.endDate
+      }))
+    ]);
   }
 
   private getPlatformValues(value: string | undefined | null): string[] {
@@ -374,30 +339,6 @@ export class GamesList {
           .filter((platform: string) => platform !== '')
       )
     );
-  }
-
-  private addYearsFromRange(startDate: string | undefined, endDate: string | undefined, years: Set<string>): void {
-    const startYear = this.getYearFromDate(startDate);
-    if (startYear == null) return;
-
-    const endYear = this.getYearFromDate(endDate) ?? startYear;
-    const minYear = Math.min(startYear, endYear);
-    const maxYear = Math.max(startYear, endYear);
-
-    for (let year = minYear; year <= maxYear; year++) {
-      years.add(String(year));
-    }
-  }
-
-  private getYearFromDate(value: string | undefined): number | null {
-    if (value == null || value.trim() === '') return null;
-
-    const normalized = value.replaceAll('?', '0').trim();
-    const parts = normalized.split('.');
-    if (parts.length !== 3) return null;
-
-    const year = Number(parts[2]);
-    return Number.isFinite(year) && year > 0 ? year : null;
   }
 
   private closeOpenFilterDropdowns(): void {

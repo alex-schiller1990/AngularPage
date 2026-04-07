@@ -1,0 +1,14 @@
+@if (chips().length > 0) {
+  <div class="flex flex-wrap items-center gap-2 pt-1">
+    @for (chip of chips(); track chip.type + '-' + chip.value) {
+      <button
+        type="button"
+        (click)="onRemoveChip(chip)"
+        class="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 hover:bg-gray-50"
+        [attr.aria-label]="'Remove filter ' + chip.label"
+      >
+        {{ chip.label }} x
+      </button>
+    }
+  </div>
+}

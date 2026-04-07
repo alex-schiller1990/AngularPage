@@ -1,18 +1,22 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { getNewestDateTimestamp } from '../../../core/date-sort.utils';
+import {
+  getCoveredYears,
+  getSortedUniqueValues,
+  matchesAnySelection,
+  removeValueFromSet,
+  toggleValueInSet
+} from '../../../core/filter.utils';
+import { ActiveFilterChipsComponent } from '../../../shared/filters/active-filter-chips/active-filter-chips';
+import { FilterDropdownComponent } from '../../../shared/filters/filter-dropdown/filter-dropdown';
+import { ActiveFilterChip, FilterOption } from '../../../shared/filters/filter.models';
 import { AnimeService } from '../anime.service';
 import { Anime } from '../anime.model';
 
-interface ActiveFilterChip {
-  type: 'search' | 'status' | 'rating' | 'releaseYear' | 'watchedYear';
-  value: string;
-  label: string;
-}
-
 @Component({
   selector: 'app-anime-list',
-  imports: [RouterLink],
+  imports: [RouterLink, FilterDropdownComponent, ActiveFilterChipsComponent],
   templateUrl: './anime-list.html',
   styleUrl: './anime-list.css',
   standalone: true
@@ -41,14 +45,14 @@ export class AnimeList {
   });
 
   protected readonly statusOptions = computed(() =>
-    this.getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.status))
+    getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.status))
   );
   protected readonly ratingOptions = computed(() =>
-    this.getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.rating), true)
+    getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.rating), true)
   );
 
   protected readonly releaseYearOptions = computed(() =>
-    this.getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.releaseYear), true)
+    getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.releaseYear), true)
   );
 
   protected readonly watchedYearOptions = computed(() => {
@@ -58,12 +62,44 @@ export class AnimeList {
         years.add(year);
       }
     }
-    return this.getSortedUniqueValues(Array.from(years), true);
+    return getSortedUniqueValues(Array.from(years), true);
   });
   protected readonly statusFacetCounts = computed(() => this.getFacetCounts('status'));
   protected readonly ratingFacetCounts = computed(() => this.getFacetCounts('rating'));
   protected readonly releaseYearFacetCounts = computed(() => this.getFacetCounts('releaseYear'));
   protected readonly watchedYearFacetCounts = computed(() => this.getFacetCounts('watchedYear'));
+  protected readonly statusFilterOptions = computed<FilterOption[]>(() =>
+    this.statusOptions().map((status) => ({
+      value: status,
+      label: this.formatStatusLabel(status),
+      count: this.statusFacetCounts().get(status) ?? 0,
+      selected: this.selectedStatuses().has(status)
+    }))
+  );
+  protected readonly ratingFilterOptions = computed<FilterOption[]>(() =>
+    this.ratingOptions().map((rating) => ({
+      value: rating,
+      label: rating,
+      count: this.ratingFacetCounts().get(rating) ?? 0,
+      selected: this.selectedRatings().has(rating)
+    }))
+  );
+  protected readonly releaseYearFilterOptions = computed<FilterOption[]>(() =>
+    this.releaseYearOptions().map((releaseYear) => ({
+      value: releaseYear,
+      label: releaseYear,
+      count: this.releaseYearFacetCounts().get(releaseYear) ?? 0,
+      selected: this.selectedReleaseYears().has(releaseYear)
+    }))
+  );
+  protected readonly watchedYearFilterOptions = computed<FilterOption[]>(() =>
+    this.watchedYearOptions().map((watchedYear) => ({
+      value: watchedYear,
+      label: watchedYear,
+      count: this.watchedYearFacetCounts().get(watchedYear) ?? 0,
+      selected: this.selectedWatchedYears().has(watchedYear)
+    }))
+  );
   protected readonly activeFilterChips = computed<ActiveFilterChip[]>(() => {
     const chips: ActiveFilterChip[] = [];
     const query = this.searchQuery().trim();
@@ -92,43 +128,23 @@ export class AnimeList {
   });
 
   protected toggleStatus(value: string): void {
-    this.selectedStatuses.update((selected) => this.toggleValueInSet(selected, value));
+    this.selectedStatuses.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected toggleRating(value: string): void {
-    this.selectedRatings.update((selected) => this.toggleValueInSet(selected, value));
+    this.selectedRatings.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected toggleReleaseYear(value: string): void {
-    this.selectedReleaseYears.update((selected) => this.toggleValueInSet(selected, value));
+    this.selectedReleaseYears.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected toggleWatchedYear(value: string): void {
-    this.selectedWatchedYears.update((selected) => this.toggleValueInSet(selected, value));
-  }
-
-  protected isStatusSelected(value: string): boolean {
-    return this.selectedStatuses().has(value);
-  }
-
-  protected isRatingSelected(value: string): boolean {
-    return this.selectedRatings().has(value);
-  }
-
-  protected isReleaseYearSelected(value: string): boolean {
-    return this.selectedReleaseYears().has(value);
-  }
-
-  protected isWatchedYearSelected(value: string): boolean {
-    return this.selectedWatchedYears().has(value);
+    this.selectedWatchedYears.update((selected) => toggleValueInSet(selected, value));
   }
 
   protected getSelectedCount(values: Set<string>): number {
     return values.size;
-  }
-
-  protected getOptionCount(counts: Map<string, number>, value: string): number {
-    return counts.get(value) ?? 0;
   }
 
   protected clearAllFilters(): void {
@@ -146,21 +162,21 @@ export class AnimeList {
     }
 
     if (chip.type === 'status') {
-      this.selectedStatuses.update((selected) => this.removeValueFromSet(selected, chip.value));
+      this.selectedStatuses.update((selected) => removeValueFromSet(selected, chip.value));
       return;
     }
 
     if (chip.type === 'rating') {
-      this.selectedRatings.update((selected) => this.removeValueFromSet(selected, chip.value));
+      this.selectedRatings.update((selected) => removeValueFromSet(selected, chip.value));
       return;
     }
 
     if (chip.type === 'releaseYear') {
-      this.selectedReleaseYears.update((selected) => this.removeValueFromSet(selected, chip.value));
+      this.selectedReleaseYears.update((selected) => removeValueFromSet(selected, chip.value));
       return;
     }
 
-    this.selectedWatchedYears.update((selected) => this.removeValueFromSet(selected, chip.value));
+    this.selectedWatchedYears.update((selected) => removeValueFromSet(selected, chip.value));
   }
 
   protected formatStatusLabel(status: string): string {
@@ -192,25 +208,6 @@ export class AnimeList {
         detailElement.removeAttribute('open');
       }
     }
-  }
-
-  private getSortedUniqueValues(
-    values: Array<string | undefined | null>,
-    sortDescendingAsNumber = false
-  ): string[] {
-    const uniqueValues = Array.from(
-      new Set(
-        values
-          .filter((value): value is string => typeof value === 'string')
-          .map((value: string) => value.trim())
-          .filter((value: string) => value !== '')
-      )
-    );
-
-    if (sortDescendingAsNumber) {
-      return uniqueValues.sort((a: string, b: string) => Number(b) - Number(a));
-    }
-    return uniqueValues.sort((a: string, b: string) => a.localeCompare(b));
   }
 
   private getFacetCounts(
@@ -259,91 +256,31 @@ export class AnimeList {
     if (!matchesSearch) return false;
 
     const matchesStatus =
-      ignoreFilter === 'status' || this.matchesAnySelection(this.selectedStatuses(), anime.status);
+      ignoreFilter === 'status' || matchesAnySelection(this.selectedStatuses(), anime.status);
     if (!matchesStatus) return false;
 
     const matchesRating =
-      ignoreFilter === 'rating' || this.matchesAnySelection(this.selectedRatings(), anime.rating);
+      ignoreFilter === 'rating' || matchesAnySelection(this.selectedRatings(), anime.rating);
     if (!matchesRating) return false;
 
     const matchesReleaseYear =
       ignoreFilter === 'releaseYear' ||
-      this.matchesAnySelection(this.selectedReleaseYears(), anime.releaseYear);
+      matchesAnySelection(this.selectedReleaseYears(), anime.releaseYear);
     if (!matchesReleaseYear) return false;
 
     if (ignoreFilter === 'watchedYear') return true;
     const watchedYears = this.watchedYearsByAnimeId().get(anime.id) ?? new Set<string>();
-    return this.matchesAnySelection(this.selectedWatchedYears(), watchedYears);
-  }
-
-  private matchesAnySelection(
-    selectedValues: Set<string>,
-    value: string | number | Set<string> | undefined | null
-  ): boolean {
-    if (selectedValues.size === 0) return true;
-    if (value == null) return false;
-
-    if (typeof value === 'string' || typeof value === 'number') {
-      return selectedValues.has(String(value).trim());
-    }
-
-    if (!(value instanceof Set)) return false;
-
-    for (const selected of selectedValues) {
-      if (value.has(selected)) return true;
-    }
-    return false;
-  }
-
-  private toggleValueInSet(currentSet: Set<string>, value: string): Set<string> {
-    const nextSet = new Set(currentSet);
-    if (nextSet.has(value)) {
-      nextSet.delete(value);
-    } else {
-      nextSet.add(value);
-    }
-    return nextSet;
-  }
-
-  private removeValueFromSet(currentSet: Set<string>, value: string): Set<string> {
-    const nextSet = new Set(currentSet);
-    nextSet.delete(value);
-    return nextSet;
+    return matchesAnySelection(this.selectedWatchedYears(), watchedYears);
   }
 
   private getWatchedYears(anime: Anime): Set<string> {
-    const watchedYears = new Set<string>();
-
-    this.addYearsFromRange(anime.startDate, anime.endDate, watchedYears);
-    for (const additionalDate of anime.additionalDates ?? []) {
-      this.addYearsFromRange(additionalDate.startDate, additionalDate.endDate, watchedYears);
-    }
-
-    return watchedYears;
-  }
-
-  private addYearsFromRange(startDate: string | undefined, endDate: string | undefined, years: Set<string>): void {
-    const startYear = this.getYearFromDate(startDate);
-    if (startYear == null) return;
-
-    const endYear = this.getYearFromDate(endDate) ?? startYear;
-    const minYear = Math.min(startYear, endYear);
-    const maxYear = Math.max(startYear, endYear);
-
-    for (let year = minYear; year <= maxYear; year++) {
-      years.add(String(year));
-    }
-  }
-
-  private getYearFromDate(value: string | undefined): number | null {
-    if (value == null || value.trim() === '') return null;
-
-    const normalized = value.replaceAll('?', '0').trim();
-    const parts = normalized.split('.');
-    if (parts.length !== 3) return null;
-
-    const year = Number(parts[2]);
-    return Number.isFinite(year) && year > 0 ? year : null;
+    return getCoveredYears([
+      { startDate: anime.startDate, endDate: anime.endDate },
+      ...(anime.additionalDates ?? []).map((additionalDate) => ({
+        startDate: additionalDate.startDate,
+        endDate: additionalDate.endDate
+      }))
+    ]);
   }
 
   private closeOpenFilterDropdowns(): void {

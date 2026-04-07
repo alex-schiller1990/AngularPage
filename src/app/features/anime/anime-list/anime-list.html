@@ -24,97 +24,41 @@
     </div>
 
     <div #filtersContainer class="flex flex-wrap items-start gap-2">
-      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
-        <summary
-          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-          role="button"
-          aria-haspopup="listbox"
-        >
-          <span>Status @if (getSelectedCount(selectedStatuses()) > 0) { ({{ getSelectedCount(selectedStatuses()) }}) }</span>
-          <span class="text-xs text-gray-500">v</span>
-        </summary>
-        <div class="absolute z-10 mt-1 w-56 rounded-md border border-gray-200 bg-white p-2 shadow-lg">
-          @for (status of statusOptions(); track status) {
-            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
-              <input
-                type="checkbox"
-                [checked]="isStatusSelected(status)"
-                (change)="toggleStatus(status)"
-              />
-              <span>{{ formatStatusLabel(status) }} ({{ getOptionCount(statusFacetCounts(), status) }})</span>
-            </label>
-          }
-        </div>
-      </details>
+      <app-filter-dropdown
+        [label]="'Status'"
+        [selectedCount]="getSelectedCount(selectedStatuses())"
+        [options]="statusFilterOptions()"
+        [panelWidthClass]="'w-56'"
+        (optionToggled)="toggleStatus($event)"
+        (dropdownToggled)="onFilterDropdownToggle($event)"
+      />
 
-      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
-        <summary
-          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-          role="button"
-          aria-haspopup="listbox"
-        >
-          <span>Rating @if (getSelectedCount(selectedRatings()) > 0) { ({{ getSelectedCount(selectedRatings()) }}) }</span>
-          <span class="text-xs text-gray-500">v</span>
-        </summary>
-        <div class="absolute z-10 mt-1 w-40 rounded-md border border-gray-200 bg-white p-2 shadow-lg">
-          @for (rating of ratingOptions(); track rating) {
-            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
-              <input
-                type="checkbox"
-                [checked]="isRatingSelected(rating)"
-                (change)="toggleRating(rating)"
-              />
-              <span>{{ rating }} ({{ getOptionCount(ratingFacetCounts(), rating) }})</span>
-            </label>
-          }
-        </div>
-      </details>
+      <app-filter-dropdown
+        [label]="'Rating'"
+        [selectedCount]="getSelectedCount(selectedRatings())"
+        [options]="ratingFilterOptions()"
+        [panelWidthClass]="'w-40'"
+        (optionToggled)="toggleRating($event)"
+        (dropdownToggled)="onFilterDropdownToggle($event)"
+      />
 
-      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
-        <summary
-          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-          role="button"
-          aria-haspopup="listbox"
-        >
-          <span>Release year @if (getSelectedCount(selectedReleaseYears()) > 0) { ({{ getSelectedCount(selectedReleaseYears()) }}) }</span>
-          <span class="text-xs text-gray-500">v</span>
-        </summary>
-        <div class="absolute z-10 mt-1 max-h-72 w-44 overflow-y-auto rounded-md border border-gray-200 bg-white p-2 shadow-lg">
-          @for (releaseYear of releaseYearOptions(); track releaseYear) {
-            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
-              <input
-                type="checkbox"
-                [checked]="isReleaseYearSelected(releaseYear)"
-                (change)="toggleReleaseYear(releaseYear)"
-              />
-              <span>{{ releaseYear }} ({{ getOptionCount(releaseYearFacetCounts(), releaseYear) }})</span>
-            </label>
-          }
-        </div>
-      </details>
+      <app-filter-dropdown
+        [label]="'Release year'"
+        [selectedCount]="getSelectedCount(selectedReleaseYears())"
+        [options]="releaseYearFilterOptions()"
+        [panelWidthClass]="'w-44'"
+        (optionToggled)="toggleReleaseYear($event)"
+        (dropdownToggled)="onFilterDropdownToggle($event)"
+      />
 
-      <details class="relative" (toggle)="onFilterDropdownToggle($event)">
-        <summary
-          class="flex min-w-40 cursor-pointer list-none items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-          role="button"
-          aria-haspopup="listbox"
-        >
-          <span>Watched year @if (getSelectedCount(selectedWatchedYears()) > 0) { ({{ getSelectedCount(selectedWatchedYears()) }}) }</span>
-          <span class="text-xs text-gray-500">v</span>
-        </summary>
-        <div class="absolute z-10 mt-1 max-h-72 w-44 overflow-y-auto rounded-md border border-gray-200 bg-white p-2 shadow-lg">
-          @for (watchedYear of watchedYearOptions(); track watchedYear) {
-            <label class="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50">
-              <input
-                type="checkbox"
-                [checked]="isWatchedYearSelected(watchedYear)"
-                (change)="toggleWatchedYear(watchedYear)"
-              />
-              <span>{{ watchedYear }} ({{ getOptionCount(watchedYearFacetCounts(), watchedYear) }})</span>
-            </label>
-          }
-        </div>
-      </details>
+      <app-filter-dropdown
+        [label]="'Watched year'"
+        [selectedCount]="getSelectedCount(selectedWatchedYears())"
+        [options]="watchedYearFilterOptions()"
+        [panelWidthClass]="'w-44'"
+        (optionToggled)="toggleWatchedYear($event)"
+        (dropdownToggled)="onFilterDropdownToggle($event)"
+      />
 
       @if (
         searchQuery() ||
@@ -133,20 +77,10 @@
       }
     </div>
 
-    @if (activeFilterChips().length > 0) {
-      <div class="flex flex-wrap items-center gap-2 pt-1">
-        @for (chip of activeFilterChips(); track chip.type + '-' + chip.value) {
-          <button
-            type="button"
-            (click)="removeFilterChip(chip); searchInput.value = searchQuery()"
-            class="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 hover:bg-gray-50"
-            [attr.aria-label]="'Remove filter ' + chip.label"
-          >
-            {{ chip.label }} x
-          </button>
-        }
-      </div>
-    }
+    <app-active-filter-chips
+      [chips]="activeFilterChips()"
+      (chipRemoved)="removeFilterChip($event); searchInput.value = searchQuery()"
+    />
 
     <p class="text-sm text-gray-500">
       {{ filteredAnime().length }} result{{ filteredAnime().length === 1 ? '' : 's' }}
