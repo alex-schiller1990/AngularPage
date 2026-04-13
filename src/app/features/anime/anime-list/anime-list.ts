@@ -8,6 +8,11 @@ import {
   removeValueFromSet,
   toggleValueInSet
 } from '../../../core/filter.utils';
+import {
+  getStatusBadgeClasses as getSharedStatusBadgeClasses,
+  getRatingBadgeClasses as getSharedRatingBadgeClasses,
+  isPerfectRating as isSharedPerfectRating
+} from '../../../shared/badge-styles.utils';
 import { ActiveFilterChipsComponent } from '../../../shared/filters/active-filter-chips/active-filter-chips';
 import { FilterDropdownComponent } from '../../../shared/filters/filter-dropdown/filter-dropdown';
 import { ActiveFilterChip, FilterOption } from '../../../shared/filters/filter.models';
@@ -184,65 +189,15 @@ export class AnimeList {
   }
 
   protected getStatusBadgeClasses(status: string): string {
-    const normalizedStatus = status.trim().toLowerCase().replace('_', '-').replace(' ', '-');
-
-    if (normalizedStatus === 'completed') {
-      return 'bg-blue-100 text-blue-700';
-    }
-
-    if (normalizedStatus === 'watching') {
-      return 'bg-green-100 text-green-700';
-    }
-
-    if (normalizedStatus === 'dropped') {
-      return 'bg-red-100 text-red-700';
-    }
-
-    if (normalizedStatus === 'on-hold') {
-      return 'bg-orange-100 text-orange-700';
-    }
-
-    return 'bg-gray-100 text-gray-700';
+    return getSharedStatusBadgeClasses(status);
   }
 
   protected getRatingBadgeClasses(rating: string | null | undefined): string {
-    if (typeof rating !== 'string') {
-      return 'bg-gray-100 text-gray-600';
-    }
-    const normalizedRatingText = rating.trim();
-    const normalizedRating = Number(normalizedRatingText);
-    if (!normalizedRatingText || Number.isNaN(normalizedRating)) {
-      return 'bg-gray-100 text-gray-600';
-    }
-
-    if (normalizedRating === 10) {
-      return 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 text-amber-900 ring-2 ring-amber-300 shadow-sm';
-    }
-
-    if (normalizedRating >= 9) {
-      return 'bg-yellow-100 text-yellow-700';
-    }
-
-    if (normalizedRating >= 8) {
-      return 'bg-blue-100 text-blue-700';
-    }
-
-    if (normalizedRating >= 7) {
-      return 'bg-green-100 text-green-700';
-    }
-
-    if (normalizedRating >= 6) {
-      return 'bg-orange-100 text-orange-700';
-    }
-
-    return 'bg-red-100 text-red-700';
+    return getSharedRatingBadgeClasses(rating);
   }
 
   protected isPerfectRating(rating: string | null | undefined): boolean {
-    if (typeof rating !== 'string') {
-      return false;
-    }
-    return Number(rating) === 10;
+    return isSharedPerfectRating(rating);
   }
 
   @HostListener('document:click', ['$event'])
