@@ -2,3 +2,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Restore browser-like list defaults globally (Tailwind preflight resets them). */
+@layer base {
+  ul {
+    list-style: disc;
+    margin: 1em 0;
+    padding-inline-start: 40px;
+  }
+
+  ol {
+    list-style: decimal;
+    margin: 1em 0;
+    padding-inline-start: 40px;
+  }
+
+  li {
+    display: list-item;
+  }
+
+  p {
+    margin: 1em 0;
+  }
+
+  ul ul,
+  ul ol,
+  ol ul,
+  ol ol {
+    margin: 0;
+  }
+}
