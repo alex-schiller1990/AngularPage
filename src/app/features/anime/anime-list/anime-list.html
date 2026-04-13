@@ -128,8 +128,22 @@
                 {{ anime.startDate }}{{ anime.endDate ? ' – ' + anime.endDate : '' }}
               </p>
 
-              <p class="text-sm font-medium">
-                ⭐ {{ anime.rating }}/10
+              <p class="text-sm">
+                <span
+                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                  [class]="getRatingBadgeClasses(anime.rating)"
+                >
+                  @if (isPerfectRating(anime.rating)) {
+                    ✨
+                  } @else {
+                    ⭐
+                  }
+                  @if (anime.rating) {
+                    {{ anime.rating }}/10
+                  } @else {
+                    No rating
+                  }
+                </span>
               </p>
             </div>
           </div>
