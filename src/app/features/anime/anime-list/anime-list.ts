@@ -183,6 +183,28 @@ export class AnimeList {
     return status.replace('-', ' ');
   }
 
+  protected getStatusBadgeClasses(status: string): string {
+    const normalizedStatus = status.trim().toLowerCase().replace('_', '-').replace(' ', '-');
+
+    if (normalizedStatus === 'completed') {
+      return 'bg-blue-100 text-blue-700';
+    }
+
+    if (normalizedStatus === 'watching') {
+      return 'bg-green-100 text-green-700';
+    }
+
+    if (normalizedStatus === 'dropped') {
+      return 'bg-red-100 text-red-700';
+    }
+
+    if (normalizedStatus === 'on-hold') {
+      return 'bg-orange-100 text-orange-700';
+    }
+
+    return 'bg-gray-100 text-gray-700';
+  }
+
   @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: MouseEvent): void {
     const container = this.filtersContainer()?.nativeElement;

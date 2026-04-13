@@ -113,12 +113,14 @@
               {{ anime.releaseYear }}
             </p>
 
-            <p class="text-sm">
-              Status: <span class="font-medium">{{ anime.status }}</span>
-            </p>
-
-            <p class="text-sm">
-              Progress: {{ anime.progress }}
+            <p class="flex items-center justify-between gap-3 text-sm">
+              <span
+                class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                [class]="getStatusBadgeClasses(anime.status)"
+              >
+                {{ formatStatusLabel(anime.status) }}
+              </span>
+              <span>{{ anime.progress }}</span>
             </p>
 
             <p class="text-sm">
