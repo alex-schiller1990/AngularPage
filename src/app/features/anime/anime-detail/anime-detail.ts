@@ -3,6 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { AnimeService } from '../anime.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  getRatingBadgeClasses as getSharedRatingBadgeClasses,
+  getStatusBadgeClasses as getSharedStatusBadgeClasses,
+  isPerfectRating as isSharedPerfectRating
+} from '../../../shared/badge-styles.utils';
 
 @Component({
   selector: 'app-anime-detail',
@@ -25,4 +30,20 @@ export class AnimeDetail {
 
   /** Flattened anime with details for the current route id. */
   protected readonly anime = computed(() => this.animeSignal()?.() ?? null);
+
+  protected formatStatusLabel(status: string): string {
+    return status.replaceAll('-', ' ');
+  }
+
+  protected getStatusBadgeClasses(status: string): string {
+    return getSharedStatusBadgeClasses(status);
+  }
+
+  protected getRatingBadgeClasses(rating: string | null | undefined): string {
+    return getSharedRatingBadgeClasses(rating);
+  }
+
+  protected isPerfectRating(rating: string | null | undefined): boolean {
+    return isSharedPerfectRating(rating);
+  }
 }
