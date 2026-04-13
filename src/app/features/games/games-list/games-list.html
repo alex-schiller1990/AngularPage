@@ -101,42 +101,65 @@
     <p class="text-sm text-gray-600">No games match your search.</p>
   } @else {
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      @for (game of filteredGames(); track game.id) {
-        <a [routerLink]="['/games', game.title]" class="block bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
+      @for (game of filteredGames(); track game.id; let index = $index) {
+        <a
+          [routerLink]="['/games', game.title]"
+          class="mx-auto flex h-full w-full max-w-[290px] flex-col bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
+        >
           <img
             [src]="game.coverURL"
             [alt]="game.name"
-            class="w-full h-64 object-cover"
+            [attr.loading]="index < 4 ? 'eager' : 'lazy'"
+            decoding="async"
+            class="w-full aspect-[290/435] object-cover"
           />
 
-          <div class="p-4 space-y-1">
+          <div class="flex h-full flex-col p-4 text-center">
             <h2 class="font-semibold leading-tight">
               {{ game.name }}
             </h2>
 
-            <p class="text-sm text-gray-500">
+            <p class="mt-1 text-sm text-gray-500">
               {{ game.releaseYear }} · {{ game.platform }}
             </p>
 
-            <p class="text-sm">
-              Status: <span class="font-medium">{{ game.status }}</span>
-            </p>
+            <div class="mt-auto space-y-1 pt-3">
+              <p class="flex items-center justify-between gap-3 text-sm">
+                <span
+                  class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                  [class]="getStatusBadgeClasses(game.status)"
+                >
+                  {{ formatStatusLabel(game.status) }}
+                </span>
+                @if (game.progress) {
+                  <span>{{ game.progress }}</span>
+                } @else {
+                  <span>-</span>
+                }
+              </p>
 
-            @if (game.progress) {
               <p class="text-sm">
-                Progress: {{ game.progress }}
+                {{ game.startDate }}{{ game.endDate ? ' – ' + game.endDate : '' }}
               </p>
-            }
 
-            <p class="text-sm">
-              {{ game.startDate }}{{ game.endDate ? ' – ' + game.endDate : '' }}
-            </p>
-
-            @if (game.rating) {
-              <p class="text-sm font-medium">
-                ⭐ {{ game.rating }}/10
+              <p class="text-sm">
+                <span
+                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                  [class]="getRatingBadgeClasses(game.rating)"
+                >
+                  @if (isPerfectRating(game.rating)) {
+                    ✨
+                  } @else {
+                    ⭐
+                  }
+                  @if (game.rating) {
+                    {{ game.rating }}/10
+                  } @else {
+                    No rating
+                  }
+                </span>
               </p>
-            }
+            </div>
           </div>
         </a>
       }
