@@ -94,7 +94,7 @@
       @for (anime of filteredAnime(); track anime.id; let index = $index) {
         <a
           [routerLink]="['/anime', anime.title]"
-          class="mx-auto block w-full max-w-[290px] bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
+          class="mx-auto flex h-full w-full max-w-[290px] flex-col bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
         >
           <img
             [src]="anime.coverURL"
@@ -104,32 +104,34 @@
             class="w-full aspect-[290/410] object-cover"
           />
 
-          <div class="p-4 space-y-1 text-center">
+          <div class="flex h-full flex-col p-4 text-center">
             <h2 class="font-semibold leading-tight">
               {{ anime.name }}
             </h2>
 
-            <p class="text-sm text-gray-500">
+            <p class="mt-1 text-sm text-gray-500">
               {{ anime.releaseYear }}
             </p>
 
-            <p class="flex items-center justify-between gap-3 text-sm">
-              <span
-                class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
-                [class]="getStatusBadgeClasses(anime.status)"
-              >
-                {{ formatStatusLabel(anime.status) }}
-              </span>
-              <span>{{ anime.progress }}</span>
-            </p>
+            <div class="mt-auto space-y-1 pt-3">
+              <p class="flex items-center justify-between gap-3 text-sm">
+                <span
+                  class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                  [class]="getStatusBadgeClasses(anime.status)"
+                >
+                  {{ formatStatusLabel(anime.status) }}
+                </span>
+                <span>{{ anime.progress }}</span>
+              </p>
 
-            <p class="text-sm">
-              {{ anime.startDate }}{{ anime.endDate ? ' – ' + anime.endDate : '' }}
-            </p>
+              <p class="text-sm">
+                {{ anime.startDate }}{{ anime.endDate ? ' – ' + anime.endDate : '' }}
+              </p>
 
-            <p class="text-sm font-medium">
-              ⭐ {{ anime.rating }}/10
-            </p>
+              <p class="text-sm font-medium">
+                ⭐ {{ anime.rating }}/10
+              </p>
+            </div>
           </div>
         </a>
       }
