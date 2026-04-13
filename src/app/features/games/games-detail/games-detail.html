@@ -1,28 +1,68 @@
 @if (game(); as g) {
-  <mat-card class="max-w-4xl mx-auto p-6 mt-6">
-    <div class="flex gap-6">
-      <img [src]="g.coverURL" class="w-48 h-auto rounded" alt="{{ g.name }}" />
+  <mat-card class="mx-auto mt-6 max-w-5xl p-6">
+    <div class="flex flex-col gap-6 md:flex-row md:items-start">
+      <div class="mx-auto w-full max-w-[290px] md:mx-0">
+        <img [src]="g.coverURL" class="w-full aspect-[290/435] rounded object-cover" alt="{{ g.name }}" />
+
+        <div class="mt-4 space-y-2 pt-1">
+          <p class="m-0 flex items-center justify-between gap-3 text-sm">
+            <span
+              class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+              [class]="getStatusBadgeClasses(g.status)"
+            >
+              {{ formatStatusLabel(g.status) }}
+            </span>
+            @if (g.progress) {
+              <span>{{ g.progress }}</span>
+            } @else {
+              <span>-</span>
+            }
+          </p>
+
+          <p class="m-0 text-center text-sm">
+            <span
+              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+              [class]="getRatingBadgeClasses(g.rating)"
+            >
+              @if (isPerfectRating(g.rating)) {
+                ✨
+              } @else {
+                ⭐
+              }
+              @if (g.rating) {
+                {{ g.rating }}/10
+              } @else {
+                No rating
+              }
+            </span>
+          </p>
+
+          <p class="m-0 flex items-center justify-between gap-3 text-sm">
+            <span class="text-gray-600">Platform:</span>
+            <span>{{ g.platform }}</span>
+          </p>
+
+          <p class="m-0 flex items-center justify-between gap-3 text-sm">
+            <span class="text-gray-600">Played:</span>
+            <span>{{ g.startDate }}{{ g.endDate ? ' – ' + g.endDate : '' }}</span>
+          </p>
+
+          @if (g.additionalDates?.length) {
+            <div class="space-y-1 pt-1 text-sm">
+              @for (ad of g.additionalDates; track $index) {
+                <p class="m-0 flex items-center justify-between gap-3">
+                  <span class="text-gray-600">{{ ad.dateComment }}</span>
+                  <span>{{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
+                </p>
+              }
+            </div>
+          }
+        </div>
+      </div>
 
       <div class="flex-1">
         <h1 class="text-2xl font-bold">{{ g.name }}</h1>
-        <p class="text-gray-500 mb-2">Released: {{ g.releaseYear }} · {{ g.platform }}</p>
-        <p>Status: {{ g.status }}</p>
-        @if (g.progress) {
-          <p>Progress: {{ g.progress }}</p>
-        }
-        <p>Start/End: {{ g.startDate }}{{ g.endDate ? ' – ' + g.endDate : '' }}</p>
-        @if (g.additionalDates?.length) {
-          <p class="text-sm text-gray-600 mt-1">
-            Additional:
-            @for (ad of g.additionalDates; track $index) {
-              <span>{{ ad.dateComment }}: {{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
-              @if (!$last) { <span class="mx-1">·</span> }
-            }
-          </p>
-        }
-        @if (g.rating) {
-          <p>Rating: {{ g.rating }}/10</p>
-        }
+        <p class="text-gray-500 mb-2">Released: {{ g.releaseYear }}</p>
 
         @if (g.details.description) {
           <section>

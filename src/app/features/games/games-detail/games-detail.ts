@@ -3,6 +3,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { GamesService } from '../games.service';
+import {
+  getRatingBadgeClasses as getSharedRatingBadgeClasses,
+  getStatusBadgeClasses as getSharedStatusBadgeClasses,
+  isPerfectRating as isSharedPerfectRating
+} from '../../../shared/badge-styles.utils';
 
 @Component({
   selector: 'app-games-detail',
@@ -25,4 +30,20 @@ export class GamesDetail {
 
   /** Flattened game with details for the current route id. */
   protected readonly game = computed(() => this.gameSignal()?.() ?? null);
+
+  protected formatStatusLabel(status: string): string {
+    return status.replaceAll('-', ' ');
+  }
+
+  protected getStatusBadgeClasses(status: string): string {
+    return getSharedStatusBadgeClasses(status);
+  }
+
+  protected getRatingBadgeClasses(rating: string | null | undefined): string {
+    return getSharedRatingBadgeClasses(rating);
+  }
+
+  protected isPerfectRating(rating: string | null | undefined): boolean {
+    return isSharedPerfectRating(rating);
+  }
 }
