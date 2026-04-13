@@ -5,7 +5,7 @@
         <img [src]="a.coverURL" class="w-full aspect-[290/410] rounded object-cover" alt="{{ a.name }}" />
 
         <div class="mt-4 space-y-2 pt-1">
-          <p class="flex items-center justify-between gap-3 text-sm">
+          <p class="m-0 flex items-center justify-between gap-3 text-sm">
             <span
               class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
               [class]="getStatusBadgeClasses(a.status)"
@@ -15,7 +15,7 @@
             <span>{{ a.progress }}</span>
           </p>
 
-          <p class="text-sm text-center">
+          <p class="m-0 text-center text-sm">
             <span
               class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
               [class]="getRatingBadgeClasses(a.rating)"
@@ -33,7 +33,7 @@
             </span>
           </p>
 
-          <p class="flex items-center justify-between gap-3 text-sm">
+          <p class="m-0 flex items-center justify-between gap-3 text-sm">
             <span class="text-gray-600">Watched:</span>
             <span>{{ a.startDate }}{{ a.endDate ? ' – ' + a.endDate : '' }}</span>
           </p>
@@ -41,7 +41,7 @@
           @if (a.additionalDates?.length) {
             <div class="space-y-1 pt-1 text-sm">
               @for (ad of a.additionalDates; track $index) {
-                <p class="flex items-center justify-between gap-3">
+                <p class="m-0 flex items-center justify-between gap-3">
                   <span class="text-gray-600">{{ ad.dateComment }}</span>
                   <span>{{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
                 </p>
@@ -64,14 +64,14 @@
         @if (a.details.opinion) {
           <section>
             <h2 class="text-xl font-semibold mt-4">Opinion</h2>
-            <p [innerHTML]="a.details.opinion"></p>
+            <div class="rich-text" [innerHTML]="a.details.opinion"></div>
           </section>
         }
 
         @if (a.details.trivia) {
           <section>
             <h2 class="text-xl font-semibold mt-4">Trivia</h2>
-            <p [innerHTML]="a.details.trivia"></p>
+            <div class="rich-text" [innerHTML]="a.details.trivia"></div>
           </section>
         }
       </div>
