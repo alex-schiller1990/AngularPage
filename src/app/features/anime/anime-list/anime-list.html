@@ -91,7 +91,7 @@
     <p class="text-sm text-gray-600">No anime match your search.</p>
   } @else {
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      @for (anime of filteredAnime(); track anime.id) {
+      @for (anime of filteredAnime(); track anime.id; let index = $index) {
         <a
           [routerLink]="['/anime', anime.title]"
           class="mx-auto block w-full max-w-[290px] bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
@@ -99,6 +99,8 @@
           <img
             [src]="anime.coverURL"
             [alt]="anime.name"
+            [attr.loading]="index < 4 ? 'eager' : 'lazy'"
+            decoding="async"
             class="w-full aspect-[290/410] object-cover"
           />
 
