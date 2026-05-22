@@ -175,6 +175,10 @@ export class GamesList {
     return values.size;
   }
 
+  protected refreshList(): void {
+    this.gamesService.refreshList();
+  }
+
   protected clearAllFilters(): void {
     this.searchQuery.set('');
     this.selectedStatuses.set(new Set());

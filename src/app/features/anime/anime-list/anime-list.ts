@@ -152,6 +152,10 @@ export class AnimeList {
     return values.size;
   }
 
+  protected refreshList(): void {
+    this.animeService.refreshList();
+  }
+
   protected clearAllFilters(): void {
     this.searchQuery.set('');
     this.selectedStatuses.set(new Set());
