@@ -1,5 +1,7 @@
 export const environment = {
   production: false,
+  /** RapidAPI key for OpenCritic (https://rapidapi.com). */
+  rapidApiKey: 'YOUR_RAPIDAPI_KEY',
   firebase: {
     apiKey: 'YOUR_API_KEY',
     authDomain: 'YOUR_PROJECT.firebaseapp.com',
