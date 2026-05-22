@@ -21,7 +21,7 @@ export class GamesService {
 
   private readonly listSignal = signal<Game[]>([]);
 
-  /** List of all games. Hydrated from localStorage when available; otherwise fetched once from Firestore. */
+  /** List of all games. Hydrated from localStorage when fresh; refetched after 2 weeks or on manual refresh. */
   readonly list = this.listSignal.asReadonly();
   readonly listLoading = signal(false);
 
@@ -30,7 +30,10 @@ export class GamesService {
   constructor() {
     const cached = readListFromStorage<Game>(LIST_STORAGE_KEY);
     if (cached) {
-      this.listSignal.set(cached);
+      this.listSignal.set(cached.data);
+      if (cached.expired) {
+        void this.fetchList();
+      }
     } else {
       void this.fetchList();
     }
