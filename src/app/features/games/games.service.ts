@@ -2,7 +2,7 @@ import { inject, Injectable, signal, Signal } from '@angular/core';
 import { collection, doc, Firestore, limit, query, where } from '@angular/fire/firestore';
 import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { collectionData$, docData$ } from '../../core/firestore.utils';
+import { collectionData$, collectionDataOnce$, docData$ } from '../../core/firestore.utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Game } from './game.model';
 import { GameDetail, GameWithDetails } from './game-detail.model';
@@ -14,8 +14,8 @@ export class GamesService {
   private readonly db = inject(Firestore);
   private readonly col = collection(this.db, COLLECTION_ID);
 
-  /** List of all games. Cached in-memory; single Firestore listener. */
-  readonly list = toSignal(collectionData$<Game>(this.col), { initialValue: [] as Game[] });
+  /** List of all games. Cached in-memory; one-time Firestore fetch. */
+  readonly list = toSignal(collectionDataOnce$<Game>(this.col), { initialValue: [] as Game[] });
 
   private readonly detailByTitleCache = new Map<string, Signal<GameWithDetails | null>>();
 

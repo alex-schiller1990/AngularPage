@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Anime } from './anime.model';
 import { AnimeDetail, AnimeWithDetails } from './anime-detail.model';
-import { collectionData$, docData$ } from '../../core/firestore.utils';
+import { collectionData$, collectionDataOnce$, docData$ } from '../../core/firestore.utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 const COLLECTION_ID = 'Anime';
@@ -14,8 +14,8 @@ export class AnimeService {
   private readonly db = inject(Firestore);
   private readonly col = collection(this.db, COLLECTION_ID);
 
-  /** List of all anime. Cached in-memory; single Firestore listener. */
-  readonly list = toSignal(collectionData$<Anime>(this.col), { initialValue: [] as Anime[] });
+  /** List of all anime. Cached in-memory; one-time Firestore fetch. */
+  readonly list = toSignal(collectionDataOnce$<Anime>(this.col), { initialValue: [] as Anime[] });
 
   private readonly detailByTitleCache = new Map<string, Signal<AnimeWithDetails | null>>();
 
