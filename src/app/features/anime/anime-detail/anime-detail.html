@@ -48,12 +48,98 @@
               }
             </div>
           }
+
+          @if (a.details.malID) {
+            <div class="mt-6 space-y-2 border-t border-gray-200 pt-4 text-sm">
+              <p class="m-0 mb-2 font-semibold">
+                @if (jikanAnime(); as mal) {
+                  <a [href]="mal.malUrl" target="_blank" rel="noopener noreferrer">MyAnimeList</a>
+                } @else {
+                  MyAnimeList
+                }
+                Data:
+              </p>
+
+              @if (jikanLoading()) {
+                <p class="m-0 text-gray-500">Loading MAL data…</p>
+              } @else if (jikanError(); as err) {
+                <p class="m-0 text-red-600">{{ err }}</p>
+              } @else if (jikanAnime(); as mal) {
+                @if (mal.synonyms) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Synonyms:</span>
+                    {{ mal.synonyms }}
+                  </p>
+                }
+
+                @if (mal.score !== null) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Score:</span>
+                    {{ mal.score }}
+                    @if (mal.scoredBy !== null) {
+                      <span class="text-gray-500">({{ mal.scoredBy | number }} users)</span>
+                    }
+                  </p>
+                }
+
+                @if (mal.rank !== null) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Rank:</span>
+                    #{{ mal.rank | number }}
+                  </p>
+                }
+
+                @if (mal.popularity !== null) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Popularity:</span>
+                    #{{ mal.popularity | number }}
+                  </p>
+                }
+
+                @if (mal.airedFrom || mal.airedTo) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Aired:</span>
+                    {{ mal.airedFrom ?? '?' }}{{ mal.airedTo ? ' – ' + mal.airedTo : '' }}
+                  </p>
+                }
+
+                @if (mal.duration) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Duration:</span>
+                    {{ mal.duration }}
+                  </p>
+                }
+
+                @if (mal.source) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Source:</span>
+                    {{ mal.source }}
+                  </p>
+                }
+
+                @if (mal.genres.length) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Genres:</span>
+                    {{ mal.genres.join(', ') }}
+                  </p>
+                }
+
+                @if (mal.studios.length) {
+                  <p class="m-0">
+                    <span class="text-gray-600">Studios:</span>
+                    {{ mal.studios.join(', ') }}
+                  </p>
+                }
+              }
+            </div>
+          }
         </div>
       </div>
 
       <div class="flex-1">
         <h1 class="text-2xl font-bold">{{ a.name }}</h1>
         <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
+
         @if (a.details.description) {
           <section>
             <h2 class="text-xl font-semibold mt-4">Description</h2>
