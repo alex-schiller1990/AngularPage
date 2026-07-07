@@ -1,5 +1,5 @@
 import { inject, Injectable, signal, Signal } from '@angular/core';
-import { collection, doc, Firestore, limit, query, where } from '@angular/fire/firestore';
+import { collection, deleteField, doc, Firestore, limit, query, updateDoc, where } from '@angular/fire/firestore';
 import { firstValueFrom, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Anime } from './anime.model';
@@ -13,6 +13,15 @@ import {
 
 const COLLECTION_ID = 'Anime';
 const LIST_STORAGE_KEY = 'angular-page.anime.list';
+
+export interface AnimeLeftPanelUpdates {
+  status: Anime['status'];
+  progress: string;
+  rating: string;
+  startDate: string;
+  endDate: string;
+  malID: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AnimeService {
@@ -43,6 +52,50 @@ export class AnimeService {
   refreshList(): void {
     removeListFromStorage(LIST_STORAGE_KEY);
     void this.fetchList();
+  }
+
+  async updateAnimeLeftPanel(
+    anime: Pick<Anime, 'id' | 'title'>,
+    updates: AnimeLeftPanelUpdates
+  ): Promise<void> {
+    const mainRef = doc(this.db, COLLECTION_ID, anime.id);
+    const detailsRef = doc(this.db, COLLECTION_ID, anime.id, 'Details', 'Details');
+    const trim = (value: string | null | undefined) => (value ?? '').trim();
+    const trimmedEndDate = trim(updates.endDate);
+    const trimmedProgress = trim(updates.progress);
+    const trimmedRating = trim(updates.rating);
+    const trimmedStartDate = trim(updates.startDate);
+    const trimmedMalId = trim(updates.malID);
+
+    const mainUpdates: Record<string, unknown> = {
+      status: updates.status,
+      progress: trimmedProgress,
+      rating: trimmedRating,
+      startDate: trimmedStartDate,
+      ...(trimmedEndDate ? { endDate: trimmedEndDate } : { endDate: deleteField() }),
+    };
+
+    await Promise.all([
+      updateDoc(mainRef, mainUpdates),
+      updateDoc(detailsRef, { malID: trimmedMalId }),
+    ]);
+
+    this.listSignal.update(list =>
+      list.map(item => {
+        if (item.id !== anime.id) return item;
+
+        const { endDate: _removedEndDate, ...rest } = item;
+        return {
+          ...rest,
+          status: updates.status,
+          progress: trimmedProgress,
+          rating: trimmedRating,
+          startDate: trimmedStartDate,
+          ...(trimmedEndDate ? { endDate: trimmedEndDate } : {}),
+        };
+      })
+    );
+    writeListToStorage(LIST_STORAGE_KEY, this.listSignal());
   }
 
   /** Anime with details by title. Queries Firebase by title, then loads main doc + Details. Cached per title. */

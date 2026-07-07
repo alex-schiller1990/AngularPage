@@ -5,139 +5,250 @@
         <img [src]="a.coverURL" class="w-full aspect-[290/410] rounded object-cover" alt="{{ a.name }}" />
 
         <div class="mt-4 space-y-2 pt-1">
-          <p class="m-0 flex items-center justify-between gap-3 text-sm">
-            <span
-              class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
-              [class]="getStatusBadgeClasses(a.status)"
-            >
-              {{ formatStatusLabel(a.status) }}
-            </span>
-            <span>{{ a.progress }}</span>
-          </p>
+          @if (editing() && draft(); as d) {
+            <div class="space-y-3 text-sm">
+              <label class="block space-y-1">
+                <span class="text-gray-600">Status</span>
+                <select
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  (change)="updateDraftField('status', $any($event.target).value)"
+                >
+                  @for (status of statusOptions; track status) {
+                    <option [value]="status" [selected]="d.status === status">
+                      {{ formatStatusLabel(status) }}
+                    </option>
+                  }
+                </select>
+              </label>
 
-          <p class="m-0 text-center text-sm">
-            <span
-              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-              [class]="getRatingBadgeClasses(a.rating)"
-            >
-              @if (isPerfectRating(a.rating)) {
-                ✨
-              } @else {
-                ⭐
-              }
-              @if (a.rating) {
-                {{ a.rating }}/10
-              } @else {
-                No rating
-              }
-            </span>
-          </p>
+              <label class="block space-y-1">
+                <span class="text-gray-600">Progress</span>
+                <input
+                  type="text"
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  [value]="d.progress"
+                  (input)="updateDraftField('progress', $any($event.target).value)"
+                />
+              </label>
 
-          <p class="m-0 flex items-center justify-between gap-3 text-sm">
-            <span class="text-gray-600">Watched:</span>
-            <span>{{ a.startDate }}{{ a.endDate ? ' – ' + a.endDate : '' }}</span>
-          </p>
+              <label class="block space-y-1">
+                <span class="text-gray-600">Rating</span>
+                <input
+                  type="text"
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  placeholder="1-10 or empty"
+                  [value]="d.rating"
+                  (input)="updateDraftField('rating', $any($event.target).value)"
+                />
+              </label>
 
-          @if (a.additionalDates?.length) {
-            <div class="space-y-1 pt-1 text-sm">
-              @for (ad of a.additionalDates; track $index) {
-                <p class="m-0 flex items-center justify-between gap-3">
-                  <span class="text-gray-600">{{ ad.dateComment }}</span>
-                  <span>{{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
-                </p>
-              }
+              <div class="space-y-1">
+                <span class="text-gray-600">Watched</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                    placeholder="Start date"
+                    [value]="d.startDate"
+                    (input)="updateDraftField('startDate', $any($event.target).value)"
+                  />
+                  <input
+                    type="text"
+                    class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                    placeholder="End date"
+                    [value]="d.endDate"
+                    (input)="updateDraftField('endDate', $any($event.target).value)"
+                  />
+                </div>
+              </div>
+
+              <label class="block space-y-1">
+                <span class="text-gray-600">MAL ID</span>
+                <input
+                  type="text"
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  placeholder="MyAnimeList ID"
+                  [value]="d.malID"
+                  (input)="updateDraftField('malID', $any($event.target).value)"
+                />
+              </label>
             </div>
-          }
+          } @else {
+            <p class="m-0 flex items-center justify-between gap-3 text-sm">
+              <span
+                class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                [class]="getStatusBadgeClasses(a.status)"
+              >
+                {{ formatStatusLabel(a.status) }}
+              </span>
+              <span>{{ a.progress }}</span>
+            </p>
 
-          @if (a.details.malID) {
-            <div class="mt-6 space-y-2 border-t border-gray-200 pt-4 text-sm">
-              <p class="m-0 mb-2 font-semibold">
-                @if (jikanAnime(); as mal) {
-                  <a [href]="mal.malUrl" target="_blank" rel="noopener noreferrer">MyAnimeList</a>
+            <p class="m-0 text-center text-sm">
+              <span
+                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                [class]="getRatingBadgeClasses(a.rating)"
+              >
+                @if (isPerfectRating(a.rating)) {
+                  ✨
                 } @else {
-                  MyAnimeList
+                  ⭐
                 }
-                Data:
-              </p>
+                @if (a.rating) {
+                  {{ a.rating }}/10
+                } @else {
+                  No rating
+                }
+              </span>
+            </p>
 
-              @if (jikanLoading()) {
-                <p class="m-0 text-gray-500">Loading MAL data…</p>
-              } @else if (jikanError(); as err) {
-                <p class="m-0 text-red-600">{{ err }}</p>
-              } @else if (jikanAnime(); as mal) {
-                @if (mal.synonyms) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Synonyms:</span>
-                    {{ mal.synonyms }}
+            <p class="m-0 flex items-center justify-between gap-3 text-sm">
+              <span class="text-gray-600">Watched:</span>
+              <span>{{ a.startDate }}{{ a.endDate ? ' – ' + a.endDate : '' }}</span>
+            </p>
+
+            @if (a.additionalDates?.length) {
+              <div class="space-y-1 pt-1 text-sm">
+                @for (ad of a.additionalDates; track $index) {
+                  <p class="m-0 flex items-center justify-between gap-3">
+                    <span class="text-gray-600">{{ ad.dateComment }}</span>
+                    <span>{{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
                   </p>
                 }
+              </div>
+            }
 
-                @if (mal.score !== null) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Score:</span>
-                    {{ mal.score }}
-                    @if (mal.scoredBy !== null) {
-                      <span class="text-gray-500">({{ mal.scoredBy | number }} users)</span>
-                    }
-                  </p>
-                }
+            @if (a.details.malID) {
+              <div class="mt-6 space-y-2 border-t border-gray-200 pt-4 text-sm">
+                <p class="m-0 mb-2 font-semibold">
+                  @if (jikanAnime(); as mal) {
+                    <a [href]="mal.malUrl" target="_blank" rel="noopener noreferrer">MyAnimeList</a>
+                  } @else {
+                    MyAnimeList
+                  }
+                  Data:
+                </p>
 
-                @if (mal.rank !== null) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Rank:</span>
-                    #{{ mal.rank | number }}
-                  </p>
-                }
+                @if (jikanLoading()) {
+                  <p class="m-0 text-gray-500">Loading MAL data…</p>
+                } @else if (jikanError(); as err) {
+                  <p class="m-0 text-red-600">{{ err }}</p>
+                } @else if (jikanAnime(); as mal) {
+                  @if (mal.synonyms) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Synonyms:</span>
+                      {{ mal.synonyms }}
+                    </p>
+                  }
 
-                @if (mal.popularity !== null) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Popularity:</span>
-                    #{{ mal.popularity | number }}
-                  </p>
-                }
+                  @if (mal.score !== null) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Score:</span>
+                      {{ mal.score }}
+                      @if (mal.scoredBy !== null) {
+                        <span class="text-gray-500">({{ mal.scoredBy | number }} users)</span>
+                      }
+                    </p>
+                  }
 
-                @if (mal.airedFrom || mal.airedTo) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Aired:</span>
-                    {{ mal.airedFrom ?? '?' }}{{ mal.airedTo ? ' – ' + mal.airedTo : '' }}
-                  </p>
-                }
+                  @if (mal.rank !== null) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Rank:</span>
+                      #{{ mal.rank | number }}
+                    </p>
+                  }
 
-                @if (mal.duration) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Duration:</span>
-                    {{ mal.duration }}
-                  </p>
-                }
+                  @if (mal.popularity !== null) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Popularity:</span>
+                      #{{ mal.popularity | number }}
+                    </p>
+                  }
 
-                @if (mal.source) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Source:</span>
-                    {{ mal.source }}
-                  </p>
-                }
+                  @if (mal.airedFrom || mal.airedTo) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Aired:</span>
+                      {{ mal.airedFrom ?? '?' }}{{ mal.airedTo ? ' – ' + mal.airedTo : '' }}
+                    </p>
+                  }
 
-                @if (mal.genres.length) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Genres:</span>
-                    {{ mal.genres.join(', ') }}
-                  </p>
-                }
+                  @if (mal.duration) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Duration:</span>
+                      {{ mal.duration }}
+                    </p>
+                  }
 
-                @if (mal.studios.length) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Studios:</span>
-                    {{ mal.studios.join(', ') }}
-                  </p>
+                  @if (mal.source) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Source:</span>
+                      {{ mal.source }}
+                    </p>
+                  }
+
+                  @if (mal.genres.length) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Genres:</span>
+                      {{ mal.genres.join(', ') }}
+                    </p>
+                  }
+
+                  @if (mal.studios.length) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Studios:</span>
+                      {{ mal.studios.join(', ') }}
+                    </p>
+                  }
                 }
-              }
-            </div>
+              </div>
+            }
           }
         </div>
       </div>
 
       <div class="flex-1">
-        <h1 class="text-2xl font-bold">{{ a.name }}</h1>
+        <div class="mb-2 flex flex-wrap items-start justify-between gap-3">
+          <h1 class="text-2xl font-bold">{{ a.name }}</h1>
+
+          @if (auth.user()) {
+            <div class="flex flex-wrap gap-2">
+              @if (editing()) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="cancelEdit()"
+                  [disabled]="saving()"
+                  aria-label="Cancel editing"
+                >
+                  Cancel
+                </button>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  type="button"
+                  (click)="saveEdit()"
+                  [disabled]="saving()"
+                  aria-label="Save changes"
+                >
+                  @if (saving()) {
+                    Saving…
+                  } @else {
+                    Save
+                  }
+                </button>
+              } @else {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="startEdit()"
+                  aria-label="Edit anime"
+                >
+                  Edit
+                </button>
+              }
+            </div>
+          }
+        </div>
         <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
 
         @if (a.details.description) {
