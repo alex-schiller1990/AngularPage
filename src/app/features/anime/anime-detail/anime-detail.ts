@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../../../core/auth/auth.service';
+import { AdditionalDate } from '../../../core/additional-date.model';
 import { AnimeLeftPanelUpdates, AnimeService } from '../anime.service';
 import { Anime } from '../anime.model';
 import { JikanAnimeService } from '../jikan-anime.service';
@@ -96,6 +97,11 @@ export class AnimeDetail {
       startDate: anime.startDate ?? '',
       endDate: anime.endDate ?? '',
       malID: anime.details.malID ?? '',
+      additionalDates: (anime.additionalDates ?? []).map(date => ({
+        dateComment: date.dateComment ?? '',
+        startDate: date.startDate ?? '',
+        endDate: date.endDate ?? '',
+      })),
     });
     this.editing.set(true);
   }
@@ -123,6 +129,48 @@ export class AnimeDetail {
     value: AnimeLeftPanelUpdates[K]
   ): void {
     this.draft.update(current => (current ? { ...current, [key]: value } : current));
+  }
+
+  protected addAdditionalDate(): void {
+    this.draft.update(current =>
+      current
+        ? {
+            ...current,
+            additionalDates: [
+              ...current.additionalDates,
+              { dateComment: '', startDate: '', endDate: '' },
+            ],
+          }
+        : current
+    );
+  }
+
+  protected removeAdditionalDate(index: number): void {
+    this.draft.update(current =>
+      current
+        ? {
+            ...current,
+            additionalDates: current.additionalDates.filter((_, i) => i !== index),
+          }
+        : current
+    );
+  }
+
+  protected updateAdditionalDateField(
+    index: number,
+    key: keyof AdditionalDate,
+    value: string
+  ): void {
+    this.draft.update(current => {
+      if (!current) return current;
+
+      return {
+        ...current,
+        additionalDates: current.additionalDates.map((date, i) =>
+          i === index ? { ...date, [key]: value } : date
+        ),
+      };
+    });
   }
 
   protected async saveEdit(): Promise<void> {

@@ -4,6 +4,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Anime } from './anime.model';
 import { AnimeDetail, AnimeWithDetails } from './anime-detail.model';
+import { AdditionalDate } from '../../core/additional-date.model';
 import { collectionData$, collectionDataOnce$, docData$ } from '../../core/firestore.utils';
 import {
   readListFromStorage,
@@ -21,6 +22,7 @@ export interface AnimeLeftPanelUpdates {
   startDate: string;
   endDate: string;
   malID: string;
+  additionalDates: AdditionalDate[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -66,6 +68,18 @@ export class AnimeService {
     const trimmedRating = trim(updates.rating);
     const trimmedStartDate = trim(updates.startDate);
     const trimmedMalId = trim(updates.malID);
+    const normalizedAdditionalDates = (updates.additionalDates ?? [])
+      .map(date => {
+        const trimmedComment = trim(date.dateComment);
+        const trimmedAdditionalStartDate = trim(date.startDate);
+        const trimmedAdditionalEndDate = trim(date.endDate);
+        return {
+          dateComment: trimmedComment,
+          startDate: trimmedAdditionalStartDate,
+          ...(trimmedAdditionalEndDate ? { endDate: trimmedAdditionalEndDate } : {}),
+        };
+      })
+      .filter(date => date.dateComment || date.startDate || date.endDate);
 
     const mainUpdates: Record<string, unknown> = {
       status: updates.status,
@@ -73,6 +87,9 @@ export class AnimeService {
       rating: trimmedRating,
       startDate: trimmedStartDate,
       ...(trimmedEndDate ? { endDate: trimmedEndDate } : { endDate: deleteField() }),
+      ...(normalizedAdditionalDates.length
+        ? { additionalDates: normalizedAdditionalDates }
+        : { additionalDates: deleteField() }),
     };
 
     await Promise.all([
@@ -84,7 +101,7 @@ export class AnimeService {
       list.map(item => {
         if (item.id !== anime.id) return item;
 
-        const { endDate: _removedEndDate, ...rest } = item;
+        const { endDate: _removedEndDate, additionalDates: _removedAdditionalDates, ...rest } = item;
         return {
           ...rest,
           status: updates.status,
@@ -92,6 +109,7 @@ export class AnimeService {
           rating: trimmedRating,
           startDate: trimmedStartDate,
           ...(trimmedEndDate ? { endDate: trimmedEndDate } : {}),
+          ...(normalizedAdditionalDates.length ? { additionalDates: normalizedAdditionalDates } : {}),
         };
       })
     );
