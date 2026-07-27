@@ -2,6 +2,9 @@ import { Component, computed, ElementRef, HostListener, inject, signal, viewChil
 import { RouterLink } from '@angular/router';
 import { getNewestDateTimestamp } from '../../../core/date-sort.utils';
 import {
+  accumulateFacetCounts,
+  collectYearsFromMap,
+  expandYearRange,
   getCoveredYears,
   getSortedUniqueValues,
   matchesAnySelection,
@@ -49,6 +52,14 @@ export class AnimeList {
     return map;
   });
 
+  private readonly releaseYearsByAnimeId = computed(() => {
+    const map = new Map<string, Set<string>>();
+    for (const anime of this.sortedAnime()) {
+      map.set(anime.id, this.getReleaseYears(anime));
+    }
+    return map;
+  });
+
   protected readonly statusOptions = computed(() =>
     getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.status))
   );
@@ -56,19 +67,9 @@ export class AnimeList {
     getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.rating), true)
   );
 
-  protected readonly releaseYearOptions = computed(() =>
-    getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.releaseYear), true)
-  );
+  protected readonly releaseYearOptions = computed(() => collectYearsFromMap(this.releaseYearsByAnimeId()));
 
-  protected readonly watchedYearOptions = computed(() => {
-    const years = new Set<string>();
-    for (const watchedYears of this.watchedYearsByAnimeId().values()) {
-      for (const year of watchedYears) {
-        years.add(year);
-      }
-    }
-    return getSortedUniqueValues(Array.from(years), true);
-  });
+  protected readonly watchedYearOptions = computed(() => collectYearsFromMap(this.watchedYearsByAnimeId()));
   protected readonly statusFacetCounts = computed(() => this.getFacetCounts('status'));
   protected readonly ratingFacetCounts = computed(() => this.getFacetCounts('rating'));
   protected readonly releaseYearFacetCounts = computed(() => this.getFacetCounts('releaseYear'));
@@ -240,19 +241,16 @@ export class AnimeList {
       if (!this.matchesAllFilters(anime, facet)) continue;
 
       if (facet === 'watchedYear') {
-        const watchedYears = this.watchedYearsByAnimeId().get(anime.id) ?? new Set<string>();
-        for (const year of watchedYears) {
-          counts.set(year, (counts.get(year) ?? 0) + 1);
-        }
+        accumulateFacetCounts(this.watchedYearsByAnimeId(), anime.id, counts);
         continue;
       }
 
-      const value =
-        facet === 'status'
-          ? anime.status
-          : facet === 'rating'
-            ? anime.rating
-            : anime.releaseYear;
+      if (facet === 'releaseYear') {
+        accumulateFacetCounts(this.releaseYearsByAnimeId(), anime.id, counts);
+        continue;
+      }
+
+      const value = facet === 'status' ? anime.status : anime.rating;
 
       if (typeof value !== 'string') continue;
       const normalized = value.trim();
@@ -284,9 +282,10 @@ export class AnimeList {
       ignoreFilter === 'rating' || matchesAnySelection(this.selectedRatings(), anime.rating);
     if (!matchesRating) return false;
 
+    const releaseYears = this.releaseYearsByAnimeId().get(anime.id) ?? new Set<string>();
     const matchesReleaseYear =
       ignoreFilter === 'releaseYear' ||
-      matchesAnySelection(this.selectedReleaseYears(), anime.releaseYear);
+      matchesAnySelection(this.selectedReleaseYears(), releaseYears);
     if (!matchesReleaseYear) return false;
 
     if (ignoreFilter === 'watchedYear') return true;
@@ -302,6 +301,10 @@ export class AnimeList {
         endDate: additionalDate.endDate
       }))
     ]);
+  }
+
+  private getReleaseYears(anime: Anime): Set<string> {
+    return expandYearRange(anime.releaseYear);
   }
 
   private closeOpenFilterDropdowns(): void {

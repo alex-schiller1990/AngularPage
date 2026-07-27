@@ -57,6 +57,57 @@ export function removeValueFromSet(currentSet: Set<string>, value: string): Set<
   return nextSet;
 }
 
+/**
+ * Expands a "YYYY" or "YYYY-YYYY" release year string into the full set of
+ * individual year strings it covers. Accepts numeric values as well as strings.
+ */
+export function expandYearRange(value: string | number | undefined | null): Set<string> {
+  const years = new Set<string>();
+  if (value == null) return years;
+
+  const parts = String(value).split('-').map((p) => p.trim());
+  const start = Number(parts[0]);
+  const end = parts.length > 1 ? Number(parts[parts.length - 1]) : start;
+
+  if (!Number.isFinite(start) || start <= 0) return years;
+  const min = Math.min(start, end);
+  const max = Number.isFinite(end) && end > 0 ? Math.max(start, end) : start;
+
+  for (let year = min; year <= max; year++) {
+    years.add(String(year));
+  }
+  return years;
+}
+
+/**
+ * Collects all year strings from a map of id → year sets into a single sorted
+ * unique array, descending by numeric value.
+ */
+export function collectYearsFromMap(map: Map<string, Set<string>>): string[] {
+  const years = new Set<string>();
+  for (const yearSet of map.values()) {
+    for (const year of yearSet) {
+      years.add(year);
+    }
+  }
+  return getSortedUniqueValues(Array.from(years), true);
+}
+
+/**
+ * Increments facet counts for every year in the per-item year set retrieved
+ * from `yearsByItemId` using `itemId`.
+ */
+export function accumulateFacetCounts(
+  yearsByItemId: Map<string, Set<string>>,
+  itemId: string,
+  counts: Map<string, number>
+): void {
+  const yearSet = yearsByItemId.get(itemId) ?? new Set<string>();
+  for (const year of yearSet) {
+    counts.set(year, (counts.get(year) ?? 0) + 1);
+  }
+}
+
 export function getCoveredYears(ranges: DateRangeValue[]): Set<string> {
   const years = new Set<string>();
 
