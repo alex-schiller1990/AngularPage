@@ -260,6 +260,41 @@
         <div class="mb-2 flex flex-wrap items-start justify-between gap-3">
           <h1 class="text-2xl font-bold">{{ a.name }}</h1>
 
+          @if (editing() && draft(); as d) {
+            <div class="mt-1 w-full space-y-2">
+              <div class="flex items-center justify-between gap-2 text-sm">
+                <span class="text-gray-600">Alternative titles</span>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="addAlternativeTitle()"
+                  aria-label="Add alternative title"
+                >
+                  Add
+                </button>
+              </div>
+              @for (title of d.alternativeTitles; track $index; let i = $index) {
+                <div class="flex items-center gap-2">
+                  <input
+                    type="text"
+                    class="flex-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+                    placeholder="Alternative title"
+                    [value]="title"
+                    (input)="updateAlternativeTitle(i, $any($event.target).value)"
+                  />
+                  <button
+                    type="button"
+                    class="text-xs text-red-600 hover:text-red-700 shrink-0"
+                    (click)="removeAlternativeTitle(i)"
+                    aria-label="Remove alternative title"
+                  >
+                    Remove
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
           @if (auth.user()) {
             <div class="flex flex-wrap gap-2">
               @if (editing()) {
@@ -313,25 +348,54 @@
           <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
         }
 
-        @if (a.details.description) {
-          <section>
-            <h2 class="text-xl font-semibold mt-4">Description</h2>
-            <p [innerHTML]="a.details.description"></p>
+        @if (editing() && draft(); as d) {
+          <section class="mt-4 space-y-4">
+            <div>
+              <h2 class="text-xl font-semibold mb-2">Description</h2>
+              <app-rich-editor
+                label=""
+                [value]="d.description"
+                (valueChange)="updateDraftField('description', $event)"
+              />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold mb-2">Opinion</h2>
+              <app-rich-editor
+                label=""
+                [value]="d.opinion"
+                (valueChange)="updateDraftField('opinion', $event)"
+              />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold mb-2">Trivia</h2>
+              <app-rich-editor
+                label=""
+                [value]="d.trivia"
+                (valueChange)="updateDraftField('trivia', $event)"
+              />
+            </div>
           </section>
-        }
+        } @else {
+          @if (a.details.description) {
+            <section>
+              <h2 class="text-xl font-semibold mt-4">Description</h2>
+              <p [innerHTML]="a.details.description"></p>
+            </section>
+          }
 
-        @if (a.details.opinion) {
-          <section>
-            <h2 class="text-xl font-semibold mt-4">Opinion</h2>
-            <div class="rich-text" [innerHTML]="a.details.opinion"></div>
-          </section>
-        }
+          @if (a.details.opinion) {
+            <section>
+              <h2 class="text-xl font-semibold mt-4">Opinion</h2>
+              <div class="rich-text" [innerHTML]="a.details.opinion"></div>
+            </section>
+          }
 
-        @if (a.details.trivia) {
-          <section>
-            <h2 class="text-xl font-semibold mt-4">Trivia</h2>
-            <div class="rich-text" [innerHTML]="a.details.trivia"></div>
-          </section>
+          @if (a.details.trivia) {
+            <section>
+              <h2 class="text-xl font-semibold mt-4">Trivia</h2>
+              <div class="rich-text" [innerHTML]="a.details.trivia"></div>
+            </section>
+          }
         }
       </div>
     </div>

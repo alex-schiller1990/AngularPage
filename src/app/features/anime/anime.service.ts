@@ -24,6 +24,10 @@ export interface AnimeUpdates {
   malID: string;
   additionalDates: AdditionalDate[];
   releaseYear: string;
+  alternativeTitles: string[];
+  description: string;
+  opinion: string;
+  trivia: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -70,6 +74,9 @@ export class AnimeService {
     const trimmedStartDate = trim(updates.startDate);
     const trimmedMalId = trim(updates.malID);
     const trimmedReleaseYear = trim(updates.releaseYear);
+    const normalizedAlternativeTitles = (updates.alternativeTitles ?? [])
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
     const normalizedAdditionalDates = (updates.additionalDates ?? [])
       .map(date => {
         const trimmedComment = trim(date.dateComment);
@@ -90,21 +97,33 @@ export class AnimeService {
       startDate: trimmedStartDate,
       releaseYear: trimmedReleaseYear,
       ...(trimmedEndDate ? { endDate: trimmedEndDate } : { endDate: deleteField() }),
+      ...(normalizedAlternativeTitles.length
+        ? { alternativeTitles: normalizedAlternativeTitles }
+        : { alternativeTitles: deleteField() }),
       ...(normalizedAdditionalDates.length
         ? { additionalDates: normalizedAdditionalDates }
         : { additionalDates: deleteField() }),
     };
 
+    const trimmedDescription = trim(updates.description);
+    const trimmedOpinion = trim(updates.opinion);
+    const trimmedTrivia = trim(updates.trivia);
+
     await Promise.all([
       updateDoc(mainRef, mainUpdates),
-      updateDoc(detailsRef, { malID: trimmedMalId }),
+      updateDoc(detailsRef, {
+        malID: trimmedMalId,
+        ...(trimmedDescription ? { description: trimmedDescription } : { description: deleteField() }),
+        ...(trimmedOpinion ? { opinion: trimmedOpinion } : { opinion: deleteField() }),
+        ...(trimmedTrivia ? { trivia: trimmedTrivia } : { trivia: deleteField() }),
+      }),
     ]);
 
     this.listSignal.update(list =>
       list.map(item => {
         if (item.id !== anime.id) return item;
 
-        const { endDate: _removedEndDate, additionalDates: _removedAdditionalDates, ...rest } = item;
+        const { endDate: _removedEndDate, additionalDates: _removedAdditionalDates, alternativeTitles: _removedAltTitles, ...rest } = item;
         return {
           ...rest,
           status: updates.status,
@@ -113,6 +132,7 @@ export class AnimeService {
           startDate: trimmedStartDate,
           releaseYear: trimmedReleaseYear,
           ...(trimmedEndDate ? { endDate: trimmedEndDate } : {}),
+          ...(normalizedAlternativeTitles.length ? { alternativeTitles: normalizedAlternativeTitles } : {}),
           ...(normalizedAdditionalDates.length ? { additionalDates: normalizedAdditionalDates } : {}),
         };
       })

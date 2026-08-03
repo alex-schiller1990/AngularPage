@@ -14,10 +14,11 @@ import {
   getStatusBadgeClasses as getSharedStatusBadgeClasses,
   isPerfectRating as isSharedPerfectRating
 } from '../../../shared/badge-styles.utils';
+import { RichEditorComponent } from '../../../shared/rich-editor/rich-editor';
 
 @Component({
   selector: 'app-anime-detail',
-  imports: [DecimalPipe, MatButtonModule, MatCardModule],
+  imports: [DecimalPipe, MatButtonModule, MatCardModule, RichEditorComponent],
   templateUrl: './anime-detail.html',
   styleUrl: './anime-detail.css',
   standalone: true
@@ -98,11 +99,15 @@ export class AnimeDetail {
       endDate: anime.endDate ?? '',
       malID: anime.details.malID ?? '',
       releaseYear: anime.releaseYear ?? '',
+      alternativeTitles: [...(anime.alternativeTitles ?? [])],
       additionalDates: (anime.additionalDates ?? []).map(date => ({
         dateComment: date.dateComment ?? '',
         startDate: date.startDate ?? '',
         endDate: date.endDate ?? '',
       })),
+      description: anime.details.description ?? '',
+      opinion: anime.details.opinion ?? '',
+      trivia: anime.details.trivia ?? '',
     });
     this.editing.set(true);
   }
@@ -130,6 +135,32 @@ export class AnimeDetail {
     value: AnimeUpdates[K]
   ): void {
     this.draft.update(current => (current ? { ...current, [key]: value } : current));
+  }
+
+  protected addAlternativeTitle(): void {
+    this.draft.update(current =>
+      current
+        ? { ...current, alternativeTitles: [...current.alternativeTitles, ''] }
+        : current
+    );
+  }
+
+  protected removeAlternativeTitle(index: number): void {
+    this.draft.update(current =>
+      current
+        ? { ...current, alternativeTitles: current.alternativeTitles.filter((_, i) => i !== index) }
+        : current
+    );
+  }
+
+  protected updateAlternativeTitle(index: number, value: string): void {
+    this.draft.update(current => {
+      if (!current) return current;
+      return {
+        ...current,
+        alternativeTitles: current.alternativeTitles.map((t, i) => (i === index ? value : t)),
+      };
+    });
   }
 
   protected addAdditionalDate(): void {
