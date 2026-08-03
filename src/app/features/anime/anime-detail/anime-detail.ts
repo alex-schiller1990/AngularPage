@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../../../core/auth/auth.service';
 import { AdditionalDate } from '../../../core/additional-date.model';
-import { AnimeLeftPanelUpdates, AnimeService } from '../anime.service';
+import { AnimeUpdates, AnimeService } from '../anime.service';
 import { Anime } from '../anime.model';
 import { JikanAnimeService } from '../jikan-anime.service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -31,7 +31,7 @@ export class AnimeDetail {
 
   protected readonly editing = signal(false);
   protected readonly saving = signal(false);
-  protected readonly draft = signal<AnimeLeftPanelUpdates | null>(null);
+  protected readonly draft = signal<AnimeUpdates | null>(null);
   protected readonly statusOptions: Anime['status'][] = ['watching', 'completed', 'dropped', 'on-hold'];
 
   private readonly paramMap = toSignal(this.route.paramMap);
@@ -97,6 +97,7 @@ export class AnimeDetail {
       startDate: anime.startDate ?? '',
       endDate: anime.endDate ?? '',
       malID: anime.details.malID ?? '',
+      releaseYear: anime.releaseYear ?? '',
       additionalDates: (anime.additionalDates ?? []).map(date => ({
         dateComment: date.dateComment ?? '',
         startDate: date.startDate ?? '',
@@ -124,9 +125,9 @@ export class AnimeDetail {
     this.saving.set(false);
   }
 
-  protected updateDraftField<K extends keyof AnimeLeftPanelUpdates>(
+  protected updateDraftField<K extends keyof AnimeUpdates>(
     key: K,
-    value: AnimeLeftPanelUpdates[K]
+    value: AnimeUpdates[K]
   ): void {
     this.draft.update(current => (current ? { ...current, [key]: value } : current));
   }
@@ -180,7 +181,7 @@ export class AnimeDetail {
 
     this.saving.set(true);
     try {
-      await this.animeService.updateAnimeLeftPanel(
+      await this.animeService.updateAnime(
         { id: anime.id, title: anime.title },
         draft
       );

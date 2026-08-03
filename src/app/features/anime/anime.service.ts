@@ -15,7 +15,7 @@ import {
 const COLLECTION_ID = 'Anime';
 const LIST_STORAGE_KEY = 'angular-page.anime.list';
 
-export interface AnimeLeftPanelUpdates {
+export interface AnimeUpdates {
   status: Anime['status'];
   progress: string;
   rating: string;
@@ -23,6 +23,7 @@ export interface AnimeLeftPanelUpdates {
   endDate: string;
   malID: string;
   additionalDates: AdditionalDate[];
+  releaseYear: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -56,9 +57,9 @@ export class AnimeService {
     void this.fetchList();
   }
 
-  async updateAnimeLeftPanel(
+  async updateAnime(
     anime: Pick<Anime, 'id' | 'title'>,
-    updates: AnimeLeftPanelUpdates
+    updates: AnimeUpdates
   ): Promise<void> {
     const mainRef = doc(this.db, COLLECTION_ID, anime.id);
     const detailsRef = doc(this.db, COLLECTION_ID, anime.id, 'Details', 'Details');
@@ -68,6 +69,7 @@ export class AnimeService {
     const trimmedRating = trim(updates.rating);
     const trimmedStartDate = trim(updates.startDate);
     const trimmedMalId = trim(updates.malID);
+    const trimmedReleaseYear = trim(updates.releaseYear);
     const normalizedAdditionalDates = (updates.additionalDates ?? [])
       .map(date => {
         const trimmedComment = trim(date.dateComment);
@@ -86,6 +88,7 @@ export class AnimeService {
       progress: trimmedProgress,
       rating: trimmedRating,
       startDate: trimmedStartDate,
+      releaseYear: trimmedReleaseYear,
       ...(trimmedEndDate ? { endDate: trimmedEndDate } : { endDate: deleteField() }),
       ...(normalizedAdditionalDates.length
         ? { additionalDates: normalizedAdditionalDates }
@@ -108,6 +111,7 @@ export class AnimeService {
           progress: trimmedProgress,
           rating: trimmedRating,
           startDate: trimmedStartDate,
+          releaseYear: trimmedReleaseYear,
           ...(trimmedEndDate ? { endDate: trimmedEndDate } : {}),
           ...(normalizedAdditionalDates.length ? { additionalDates: normalizedAdditionalDates } : {}),
         };

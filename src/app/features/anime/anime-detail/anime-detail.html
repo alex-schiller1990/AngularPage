@@ -299,7 +299,19 @@
             </div>
           }
         </div>
-        <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
+        @if (editing() && draft(); as d) {
+          <label class="mb-2 flex items-center gap-2 text-sm">
+            <span class="text-gray-500 shrink-0">Released:</span>
+            <input
+              type="text"
+              class="rounded-md border border-gray-300 px-2 py-1 text-sm"
+              [value]="d.releaseYear"
+              (input)="updateDraftField('releaseYear', $any($event.target).value)"
+            />
+          </label>
+        } @else {
+          <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
+        }
 
         @if (a.details.description) {
           <section>
