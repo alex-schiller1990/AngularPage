@@ -43,40 +43,21 @@
   color: #3730a3;
 }
 
+.tb-btn-danger {
+  color: #dc2626;
+}
+
+.tb-btn-danger:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .editor-content {
   padding: 8px 12px;
   min-height: 120px;
   outline: none;
   font-size: 14px;
   line-height: 1.6;
-}
-
-/* Tiptap sets contenteditable on the inner .tiptap div */
-.editor-content :global(.tiptap) {
-  outline: none;
-  min-height: 100px;
-}
-
-.editor-content :global(ul) {
-  list-style: disc;
-  padding-left: 1.25rem;
-}
-
-.editor-content :global(ol) {
-  list-style: decimal;
-  padding-left: 1.25rem;
-}
-
-.editor-content :global(blockquote) {
-  border-left: 3px solid #d1d5db;
-  padding-left: 0.75rem;
-  color: #6b7280;
-  margin: 0.5rem 0;
-}
-
-.editor-content :global(a) {
-  color: #3b82f6;
-  text-decoration: underline;
 }
 
 .emoji-picker {

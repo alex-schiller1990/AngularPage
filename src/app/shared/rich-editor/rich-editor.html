@@ -1,13 +1,9 @@
 <div class="rich-editor-wrapper">
-  @if (label) {
-    <span class="block text-sm text-gray-600 mb-1">{{ label }}</span>
-  }
-
   <div class="toolbar">
     <button
       type="button"
       class="tb-btn"
-      [class.active]="isActive('bold')"
+      [class.active]="isBold()"
       (click)="toggleBold()"
       matTooltip="Bold"
     ><b>B</b></button>
@@ -15,7 +11,7 @@
     <button
       type="button"
       class="tb-btn"
-      [class.active]="isActive('italic')"
+      [class.active]="isItalic()"
       (click)="toggleItalic()"
       matTooltip="Italic"
     ><em>I</em></button>
@@ -23,7 +19,7 @@
     <button
       type="button"
       class="tb-btn"
-      [class.active]="isActive('bulletList')"
+      [class.active]="isBulletList()"
       (click)="toggleBulletList()"
       matTooltip="Bullet list"
     >≡</button>
@@ -31,7 +27,7 @@
     <button
       type="button"
       class="tb-btn"
-      [class.active]="isActive('orderedList')"
+      [class.active]="isOrderedList()"
       (click)="toggleOrderedList()"
       matTooltip="Ordered list"
     >1≡</button>
@@ -39,7 +35,7 @@
     <button
       type="button"
       class="tb-btn"
-      [class.active]="isActive('blockquote')"
+      [class.active]="isBlockquote()"
       (click)="toggleBlockquote()"
       matTooltip="Blockquote"
     >"</button>
@@ -47,10 +43,27 @@
     <button
       type="button"
       class="tb-btn"
-      [class.active]="isActive('link')"
+      [class.active]="isLink()"
       (click)="setLink()"
       matTooltip="Insert / edit link"
     >🔗</button>
+
+    <button
+      type="button"
+      class="tb-btn"
+      [class.active]="isSpoiler()"
+      (click)="insertSpoiler()"
+      matTooltip="Insert spoiler / accordion block"
+    >▼…</button>
+
+    @if (isSpoiler()) {
+      <button
+        type="button"
+        class="tb-btn tb-btn-danger"
+        (click)="deleteSpoiler()"
+        matTooltip="Delete spoiler block"
+      >✕</button>
+    }
 
     <button
       type="button"

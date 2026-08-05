@@ -348,29 +348,26 @@
           <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
         }
 
-        @if (editing() && draft(); as d) {
+        @if (editing()) {
           <section class="mt-4 space-y-4">
             <div>
               <h2 class="text-xl font-semibold mb-2">Description</h2>
               <app-rich-editor
-                label=""
-                [value]="d.description"
+                [value]="initialDescription"
                 (valueChange)="updateDraftField('description', $event)"
               />
             </div>
             <div>
               <h2 class="text-xl font-semibold mb-2">Opinion</h2>
               <app-rich-editor
-                label=""
-                [value]="d.opinion"
+                [value]="initialOpinion"
                 (valueChange)="updateDraftField('opinion', $event)"
               />
             </div>
             <div>
               <h2 class="text-xl font-semibold mb-2">Trivia</h2>
               <app-rich-editor
-                label=""
-                [value]="d.trivia"
+                [value]="initialTrivia"
                 (valueChange)="updateDraftField('trivia', $event)"
               />
             </div>
@@ -379,7 +376,7 @@
           @if (a.details.description) {
             <section>
               <h2 class="text-xl font-semibold mt-4">Description</h2>
-              <p [innerHTML]="a.details.description"></p>
+              <div class="rich-text" [innerHTML]="a.details.description"></div>
             </section>
           }
 

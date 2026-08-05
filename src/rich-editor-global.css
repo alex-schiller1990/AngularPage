@@ -1,0 +1,105 @@
+/* Styles for the Tiptap rich editor (.editor-content) and read-only view (.rich-text).
+   Kept in a separate file because Angular component CSS is scoped and cannot style
+   Tiptap's dynamically injected DOM — these rules must be global. */
+
+/* ── Editor content area ─────────────────────────────────────────────────── */
+
+.editor-content .tiptap {
+  outline: none;
+  min-height: 100px;
+}
+
+/* The <p> inside <li> is required by ProseMirror's schema but should be invisible. */
+.editor-content li > p {
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+
+.editor-content blockquote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 0.75rem;
+  color: #6b7280;
+  margin: 0.5rem 0;
+}
+
+.editor-content a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+/* Spoiler block — editor representation (div-based, always visible) */
+.editor-content div[data-type="spoiler"] {
+  border: 1px solid #c7d2fe;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+.editor-content div[data-type="spoiler-title"] {
+  padding: 6px 10px;
+  font-weight: 500;
+  background: #eef2ff;
+  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid #c7d2fe;
+  cursor: text;
+}
+
+.editor-content div[data-type="spoiler-title"]::before {
+  content: '▼ ';
+  font-size: 10px;
+  color: #6366f1;
+  pointer-events: none;
+}
+
+.editor-content div[data-type="spoiler"] > :not(div[data-type="spoiler-title"]) {
+  padding: 6px 12px;
+  min-height: 2em;
+  border-left: 2px solid #c7d2fe;
+  margin: 0;
+}
+
+/* ── Rich-text read-only view (.rich-text) ──────────────────────────────── */
+
+.rich-text li > p {
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+
+.rich-text details {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+.rich-text summary {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 500;
+  user-select: none;
+  background: #f9fafb;
+  border-radius: 6px 6px 0 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rich-text summary::-webkit-details-marker {
+  display: none;
+}
+
+.rich-text summary::before {
+  content: '▶';
+  font-size: 10px;
+  transition: transform 0.15s;
+  display: inline-block;
+}
+
+.rich-text details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.rich-text details > :not(summary) {
+  padding: 6px 12px;
+}

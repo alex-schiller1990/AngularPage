@@ -35,6 +35,13 @@ export class AnimeDetail {
   protected readonly draft = signal<AnimeUpdates | null>(null);
   protected readonly statusOptions: Anime['status'][] = ['watching', 'completed', 'dropped', 'on-hold'];
 
+  // Frozen initial values passed to <app-rich-editor [value]>.
+  // Set once when editing starts and never changed — binding [value] to a
+  // live signal would cause the editor component to recreate on every keystroke.
+  protected initialDescription = '';
+  protected initialOpinion = '';
+  protected initialTrivia = '';
+
   private readonly paramMap = toSignal(this.route.paramMap);
   /** URL param is the anime title (e.g. /anime/abc → title 'abc'). */
   private readonly titleParam = computed(() => this.paramMap()?.get('id') ?? null);
@@ -109,6 +116,9 @@ export class AnimeDetail {
       opinion: anime.details.opinion ?? '',
       trivia: anime.details.trivia ?? '',
     });
+    this.initialDescription = anime.details.description ?? '';
+    this.initialOpinion = anime.details.opinion ?? '';
+    this.initialTrivia = anime.details.trivia ?? '';
     this.editing.set(true);
   }
 
