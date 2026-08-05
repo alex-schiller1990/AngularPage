@@ -15,10 +15,11 @@ import {
   isPerfectRating as isSharedPerfectRating
 } from '../../../shared/badge-styles.utils';
 import { RichEditorComponent } from '../../../shared/rich-editor/rich-editor';
+import { MigrateLegacyTriviaPipe } from '../../../shared/migrate-legacy-trivia.pipe';
 
 @Component({
   selector: 'app-anime-detail',
-  imports: [DecimalPipe, MatButtonModule, MatCardModule, RichEditorComponent],
+  imports: [DecimalPipe, MatButtonModule, MatCardModule, RichEditorComponent, MigrateLegacyTriviaPipe],
   templateUrl: './anime-detail.html',
   styleUrl: './anime-detail.css',
   standalone: true
