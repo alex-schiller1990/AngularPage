@@ -1,5 +1,5 @@
 import { inject, Injectable, signal, Signal } from '@angular/core';
-import { collection, doc, Firestore, limit, query, where } from '@angular/fire/firestore';
+import { collection, deleteField, doc, Firestore, limit, query, updateDoc, where } from '@angular/fire/firestore';
 import { firstValueFrom, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { collectionData$, collectionDataOnce$, docData$ } from '../../core/firestore.utils';
@@ -8,8 +8,26 @@ import {
   removeListFromStorage,
   writeListToStorage,
 } from '../../core/list-storage.utils';
+import { AdditionalDate } from '../../core/additional-date.model';
 import { Game } from './game.model';
 import { GameDetail, GameWithDetails } from './game-detail.model';
+
+export interface GameUpdates {
+  status: Game['status'];
+  progress: string;
+  rating: string;
+  startDate: string;
+  endDate: string;
+  platform: string;
+  additionalDates: AdditionalDate[];
+  releaseYear: string;
+  alternativeTitles: string[];
+  openCriticID: string;
+  openCriticURL: string;
+  description: string;
+  opinion: string;
+  trivia: string;
+}
 
 const COLLECTION_ID = 'Games';
 const LIST_STORAGE_KEY = 'angular-page.games.list';
@@ -66,6 +84,90 @@ export class GamesService {
     stream.subscribe(value => sig.set(value));
     this.detailByTitleCache.set(title, sig);
     return sig;
+  }
+
+  async updateGame(
+    game: Pick<Game, 'id' | 'title'>,
+    updates: GameUpdates
+  ): Promise<void> {
+    const mainRef = doc(this.db, COLLECTION_ID, game.id);
+    const detailsRef = doc(this.db, COLLECTION_ID, game.id, 'Details', 'Details');
+    const trim = (value: string | null | undefined) => (value ?? '').trim();
+    const trimmedEndDate = trim(updates.endDate);
+    const trimmedProgress = trim(updates.progress);
+    const trimmedRating = trim(updates.rating);
+    const trimmedStartDate = trim(updates.startDate);
+    const trimmedPlatform = trim(updates.platform);
+    const trimmedReleaseYear = trim(updates.releaseYear);
+    const trimmedOpenCriticID = trim(updates.openCriticID);
+    const trimmedOpenCriticURL = trim(updates.openCriticURL);
+    const normalizedAlternativeTitles = (updates.alternativeTitles ?? [])
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+    const normalizedAdditionalDates = (updates.additionalDates ?? [])
+      .map(date => {
+        const trimmedComment = trim(date.dateComment);
+        const trimmedAdditionalStartDate = trim(date.startDate);
+        const trimmedAdditionalEndDate = trim(date.endDate);
+        return {
+          dateComment: trimmedComment,
+          startDate: trimmedAdditionalStartDate,
+          ...(trimmedAdditionalEndDate ? { endDate: trimmedAdditionalEndDate } : {}),
+        };
+      })
+      .filter(date => date.dateComment || date.startDate || date.endDate);
+
+    const mainUpdates: Record<string, unknown> = {
+      status: updates.status,
+      progress: trimmedProgress,
+      rating: trimmedRating,
+      startDate: trimmedStartDate,
+      releaseYear: trimmedReleaseYear,
+      platform: trimmedPlatform,
+      ...(trimmedEndDate ? { endDate: trimmedEndDate } : { endDate: deleteField() }),
+      ...(normalizedAlternativeTitles.length
+        ? { alternativeTitles: normalizedAlternativeTitles }
+        : { alternativeTitles: deleteField() }),
+      ...(normalizedAdditionalDates.length
+        ? { additionalDates: normalizedAdditionalDates }
+        : { additionalDates: deleteField() }),
+    };
+
+    const trimmedDescription = trim(updates.description);
+    const trimmedOpinion = trim(updates.opinion);
+    const trimmedTrivia = trim(updates.trivia);
+
+    await Promise.all([
+      updateDoc(mainRef, mainUpdates),
+      updateDoc(detailsRef, {
+        ...(trimmedOpenCriticID ? { openCriticID: trimmedOpenCriticID } : { openCriticID: deleteField() }),
+        ...(trimmedOpenCriticURL ? { openCriticURL: trimmedOpenCriticURL } : { openCriticURL: deleteField() }),
+        ...(trimmedDescription ? { description: trimmedDescription } : { description: deleteField() }),
+        ...(trimmedOpinion ? { opinion: trimmedOpinion } : { opinion: deleteField() }),
+        ...(trimmedTrivia ? { trivia: trimmedTrivia } : { trivia: deleteField() }),
+      }),
+    ]);
+
+    this.listSignal.update(list =>
+      list.map(item => {
+        if (item.id !== game.id) return item;
+
+        const { endDate: _removedEndDate, additionalDates: _removedAdditionalDates, alternativeTitles: _removedAltTitles, ...rest } = item;
+        return {
+          ...rest,
+          status: updates.status,
+          progress: trimmedProgress,
+          rating: trimmedRating,
+          startDate: trimmedStartDate,
+          releaseYear: trimmedReleaseYear,
+          platform: trimmedPlatform,
+          ...(trimmedEndDate ? { endDate: trimmedEndDate } : {}),
+          ...(normalizedAlternativeTitles.length ? { alternativeTitles: normalizedAlternativeTitles } : {}),
+          ...(normalizedAdditionalDates.length ? { additionalDates: normalizedAdditionalDates } : {}),
+        };
+      })
+    );
+    writeListToStorage(LIST_STORAGE_KEY, this.listSignal());
   }
 
   private async fetchList(): Promise<void> {

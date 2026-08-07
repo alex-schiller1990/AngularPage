@@ -5,153 +5,408 @@
         <img [src]="g.coverURL" class="w-full aspect-[290/435] rounded object-cover" alt="{{ g.name }}" />
 
         <div class="mt-4 space-y-2 pt-1">
-          <p class="m-0 flex items-center justify-between gap-3 text-sm">
-            <span
-              class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
-              [class]="getStatusBadgeClasses(g.status)"
-            >
-              {{ formatStatusLabel(g.status) }}
-            </span>
-            @if (g.progress) {
-              <span>{{ g.progress }}</span>
-            } @else {
-              <span>-</span>
-            }
-          </p>
+          @if (editing() && draft(); as d) {
+            <div class="space-y-3 text-sm">
+              <label class="block space-y-1">
+                <span class="text-gray-600">Status</span>
+                <select
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  (change)="updateDraftField('status', $any($event.target).value)"
+                >
+                  @for (status of statusOptions; track status) {
+                    <option [value]="status" [selected]="d.status === status">
+                      {{ formatStatusLabel(status) }}
+                    </option>
+                  }
+                </select>
+              </label>
 
-          <p class="m-0 text-center text-sm">
-            <span
-              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-              [class]="getRatingBadgeClasses(g.rating)"
-            >
-              @if (isPerfectRating(g.rating)) {
-                ✨
-              } @else {
-                ⭐
-              }
-              @if (g.rating) {
-                {{ g.rating }}/10
-              } @else {
-                No rating
-              }
-            </span>
-          </p>
+              <label class="block space-y-1">
+                <span class="text-gray-600">Progress</span>
+                <input
+                  type="text"
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  [value]="d.progress"
+                  (input)="updateDraftField('progress', $any($event.target).value)"
+                />
+              </label>
 
-          <p class="m-0 flex items-center justify-between gap-3 text-sm">
-            <span class="text-gray-600">Platform:</span>
-            <span>{{ g.platform }}</span>
-          </p>
+              <label class="block space-y-1">
+                <span class="text-gray-600">Rating</span>
+                <input
+                  type="text"
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  placeholder="1-10 or empty"
+                  [value]="d.rating"
+                  (input)="updateDraftField('rating', $any($event.target).value)"
+                />
+              </label>
 
-          <p class="m-0 flex items-center justify-between gap-3 text-sm">
-            <span class="text-gray-600">Played:</span>
-            <span>{{ g.startDate }}{{ g.endDate ? ' – ' + g.endDate : '' }}</span>
-          </p>
+              <label class="block space-y-1">
+                <span class="text-gray-600">Platform</span>
+                <input
+                  type="text"
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  [value]="d.platform"
+                  (input)="updateDraftField('platform', $any($event.target).value)"
+                />
+              </label>
 
-          @if (g.additionalDates?.length) {
-            <div class="space-y-1 pt-1 text-sm">
-              @for (ad of g.additionalDates; track $index) {
-                <p class="m-0 flex items-center justify-between gap-3">
-                  <span class="text-gray-600">{{ ad.dateComment }}</span>
-                  <span>{{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
-                </p>
-              }
+              <div class="space-y-1">
+                <span class="text-gray-600">Played</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                    placeholder="Start date"
+                    [value]="d.startDate"
+                    (input)="updateDraftField('startDate', $any($event.target).value)"
+                  />
+                  <input
+                    type="text"
+                    class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                    placeholder="End date"
+                    [value]="d.endDate"
+                    (input)="updateDraftField('endDate', $any($event.target).value)"
+                  />
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-gray-600">Additional dates</span>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    (click)="addAdditionalDate()"
+                    aria-label="Add additional date"
+                  >
+                    Add
+                  </button>
+                </div>
+
+                @for (ad of d.additionalDates; track $index; let i = $index) {
+                  <div class="space-y-2 rounded-md border border-gray-200 p-2">
+                    <input
+                      type="text"
+                      class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                      placeholder="Comment (e.g. Replay)"
+                      [value]="ad.dateComment"
+                      (input)="updateAdditionalDateField(i, 'dateComment', $any($event.target).value)"
+                    />
+                    <div class="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                        placeholder="Start date"
+                        [value]="ad.startDate"
+                        (input)="updateAdditionalDateField(i, 'startDate', $any($event.target).value)"
+                      />
+                      <input
+                        type="text"
+                        class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                        placeholder="End date"
+                        [value]="ad.endDate ?? ''"
+                        (input)="updateAdditionalDateField(i, 'endDate', $any($event.target).value)"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      class="text-xs text-red-600 hover:text-red-700"
+                      (click)="removeAdditionalDate(i)"
+                      aria-label="Remove additional date"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <label class="block space-y-1">
+                <span class="text-gray-600">OpenCritic ID</span>
+                <input
+                  type="text"
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  placeholder="OpenCritic game ID"
+                  [value]="d.openCriticID"
+                  (input)="updateDraftField('openCriticID', $any($event.target).value)"
+                />
+              </label>
+
+              <label class="block space-y-1">
+                <span class="text-gray-600">OpenCritic URL</span>
+                <input
+                  type="text"
+                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  placeholder="https://opencritic.com/…"
+                  [value]="d.openCriticURL"
+                  (input)="updateDraftField('openCriticURL', $any($event.target).value)"
+                />
+              </label>
             </div>
-          }
+          } @else {
+            <p class="m-0 flex items-center justify-between gap-3 text-sm">
+              <span
+                class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                [class]="getStatusBadgeClasses(g.status)"
+              >
+                {{ formatStatusLabel(g.status) }}
+              </span>
+              @if (g.progress) {
+                <span>{{ g.progress }}</span>
+              } @else {
+                <span>-</span>
+              }
+            </p>
 
-          @if (g.details.openCriticID) {
-            <div class="mt-6 space-y-2 border-t border-gray-200 pt-4 text-sm">
-              <p class="m-0 mb-2 font-semibold">
-                @if (g.details.openCriticURL) {
-                  <a [href]="g.details.openCriticURL" target="_blank" rel="noopener noreferrer">OpenCritic</a>
+            <p class="m-0 text-center text-sm">
+              <span
+                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                [class]="getRatingBadgeClasses(g.rating)"
+              >
+                @if (isPerfectRating(g.rating)) {
+                  ✨
                 } @else {
-                  OpenCritic
+                  ⭐
                 }
-                Data:
-              </p>
+                @if (g.rating) {
+                  {{ g.rating }}/10
+                } @else {
+                  No rating
+                }
+              </span>
+            </p>
 
-              @if (openCriticLoading()) {
-                <p class="m-0 text-gray-500">Loading OpenCritic data…</p>
-              } @else if (openCriticError(); as err) {
-                <p class="m-0 text-red-600">{{ err }}</p>
-              } @else if (openCritic(); as oc) {
-                @if (oc.topCriticScore !== null) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Top critic score:</span>
-                    {{ oc.topCriticScore }}
-                    <span class="text-gray-500">({{ oc.numReviews | number }} reviews)</span>
-                  </p>
-                } @else if (oc.numReviews) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Reviews:</span>
-                    {{ oc.numReviews | number }}
-                  </p>
-                }
+            <p class="m-0 flex items-center justify-between gap-3 text-sm">
+              <span class="text-gray-600">Platform:</span>
+              <span>{{ g.platform }}</span>
+            </p>
 
-                @if (oc.firstReleaseDate) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Released:</span>
-                    {{ oc.firstReleaseDate }}
-                  </p>
-                }
+            <p class="m-0 flex items-center justify-between gap-3 text-sm">
+              <span class="text-gray-600">Played:</span>
+              <span>{{ g.startDate }}{{ g.endDate ? ' – ' + g.endDate : '' }}</span>
+            </p>
 
-                @if (oc.platforms.length) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Platforms:</span>
-                    {{ oc.platforms.join(', ') }}
+            @if (g.additionalDates?.length) {
+              <div class="space-y-1 pt-1 text-sm">
+                @for (ad of g.additionalDates; track $index) {
+                  <p class="m-0 flex items-center justify-between gap-3">
+                    <span class="text-gray-600">{{ ad.dateComment }}</span>
+                    <span>{{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
                   </p>
                 }
+              </div>
+            }
 
-                @if (oc.genres.length) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Genres:</span>
-                    {{ oc.genres.join(', ') }}
-                  </p>
-                }
+            @if (g.details.openCriticID) {
+              <div class="mt-6 space-y-2 border-t border-gray-200 pt-4 text-sm">
+                <p class="m-0 mb-2 font-semibold">
+                  @if (g.details.openCriticURL) {
+                    <a [href]="g.details.openCriticURL" target="_blank" rel="noopener noreferrer">OpenCritic</a>
+                  } @else {
+                    OpenCritic
+                  }
+                  Data:
+                </p>
 
-                @if (oc.developer) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Developer:</span>
-                    {{ oc.developer }}
-                  </p>
-                }
+                @if (openCriticLoading()) {
+                  <p class="m-0 text-gray-500">Loading OpenCritic data…</p>
+                } @else if (openCriticError(); as err) {
+                  <p class="m-0 text-red-600">{{ err }}</p>
+                } @else if (openCritic(); as oc) {
+                  @if (oc.topCriticScore !== null) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Top critic score:</span>
+                      {{ oc.topCriticScore }}
+                      <span class="text-gray-500">({{ oc.numReviews | number }} reviews)</span>
+                    </p>
+                  } @else if (oc.numReviews) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Reviews:</span>
+                      {{ oc.numReviews | number }}
+                    </p>
+                  }
 
-                @if (oc.publisher) {
-                  <p class="m-0">
-                    <span class="text-gray-600">Publisher:</span>
-                    {{ oc.publisher }}
-                  </p>
+                  @if (oc.firstReleaseDate) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Released:</span>
+                      {{ oc.firstReleaseDate }}
+                    </p>
+                  }
+
+                  @if (oc.platforms.length) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Platforms:</span>
+                      {{ oc.platforms.join(', ') }}
+                    </p>
+                  }
+
+                  @if (oc.genres.length) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Genres:</span>
+                      {{ oc.genres.join(', ') }}
+                    </p>
+                  }
+
+                  @if (oc.developer) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Developer:</span>
+                      {{ oc.developer }}
+                    </p>
+                  }
+
+                  @if (oc.publisher) {
+                    <p class="m-0">
+                      <span class="text-gray-600">Publisher:</span>
+                      {{ oc.publisher }}
+                    </p>
+                  }
                 }
-              }
-            </div>
+              </div>
+            }
           }
         </div>
       </div>
 
       <div class="flex-1">
-        <h1 class="text-2xl font-bold">{{ g.name }}</h1>
-        <p class="text-gray-500 mb-2">Released: {{ g.releaseYear }}</p>
+        <div class="mb-2 flex flex-wrap items-start justify-between gap-3">
+          <h1 class="text-2xl font-bold">{{ g.name }}</h1>
 
-        @if (g.details.description) {
-          <section>
-            <h2 class="text-xl font-semibold mt-4">Description</h2>
-            <p [innerHTML]="g.details.description"></p>
-          </section>
+          @if (editing() && draft(); as d) {
+            <div class="mt-1 w-full space-y-2">
+              <div class="flex items-center justify-between gap-2 text-sm">
+                <span class="text-gray-600">Alternative titles</span>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="addAlternativeTitle()"
+                  aria-label="Add alternative title"
+                >
+                  Add
+                </button>
+              </div>
+              @for (title of d.alternativeTitles; track $index; let i = $index) {
+                <div class="flex items-center gap-2">
+                  <input
+                    type="text"
+                    class="flex-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+                    placeholder="Alternative title"
+                    [value]="title"
+                    (input)="updateAlternativeTitle(i, $any($event.target).value)"
+                  />
+                  <button
+                    type="button"
+                    class="text-xs text-red-600 hover:text-red-700 shrink-0"
+                    (click)="removeAlternativeTitle(i)"
+                    aria-label="Remove alternative title"
+                  >
+                    Remove
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          @if (auth.user()) {
+            <div class="flex flex-wrap gap-2">
+              @if (editing()) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="cancelEdit()"
+                  [disabled]="saving()"
+                  aria-label="Cancel editing"
+                >
+                  Cancel
+                </button>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  type="button"
+                  (click)="saveEdit()"
+                  [disabled]="saving()"
+                  aria-label="Save changes"
+                >
+                  @if (saving()) {
+                    Saving…
+                  } @else {
+                    Save
+                  }
+                </button>
+              } @else {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="startEdit()"
+                  aria-label="Edit game"
+                >
+                  Edit
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        @if (editing() && draft(); as d) {
+          <label class="mb-2 flex items-center gap-2 text-sm">
+            <span class="text-gray-500 shrink-0">Released:</span>
+            <input
+              type="text"
+              class="rounded-md border border-gray-300 px-2 py-1 text-sm"
+              [value]="d.releaseYear"
+              (input)="updateDraftField('releaseYear', $any($event.target).value)"
+            />
+          </label>
+        } @else {
+          <p class="text-gray-500 mb-2">Released: {{ g.releaseYear }}</p>
         }
 
-        @if (g.details.opinion) {
-          <section>
-            <h2 class="text-xl font-semibold mt-4">Opinion</h2>
-            <p [innerHTML]="g.details.opinion"></p>
+        @if (editing()) {
+          <section class="mt-4 space-y-4">
+            <div>
+              <h2 class="text-xl font-semibold mb-2">Description</h2>
+              <app-rich-editor
+                [value]="initialDescription"
+                (valueChange)="updateDraftField('description', $event)"
+              />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold mb-2">Opinion</h2>
+              <app-rich-editor
+                [value]="initialOpinion"
+                (valueChange)="updateDraftField('opinion', $event)"
+              />
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold mb-2">Trivia</h2>
+              <app-rich-editor
+                [value]="initialTrivia"
+                (valueChange)="updateDraftField('trivia', $event)"
+              />
+            </div>
           </section>
-        }
+        } @else {
+          @if (g.details.description) {
+            <section>
+              <h2 class="text-xl font-semibold mt-4">Description</h2>
+              <div class="rich-text" [innerHTML]="g.details.description"></div>
+            </section>
+          }
 
-        @if (g.details.trivia) {
-          <section>
-            <h2 class="text-xl font-semibold mt-4">Trivia</h2>
-            <p [innerHTML]="g.details.trivia"></p>
-          </section>
-        }
+          @if (g.details.opinion) {
+            <section>
+              <h2 class="text-xl font-semibold mt-4">Opinion</h2>
+              <div class="rich-text" [innerHTML]="g.details.opinion"></div>
+            </section>
+          }
 
+          @if (g.details.trivia) {
+            <section>
+              <h2 class="text-xl font-semibold mt-4">Trivia</h2>
+              <div class="rich-text" [innerHTML]="g.details.trivia | migrateLegacyTrivia"></div>
+            </section>
+          }
+        }
       </div>
     </div>
   </mat-card>
