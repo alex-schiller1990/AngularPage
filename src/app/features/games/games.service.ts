@@ -9,6 +9,7 @@ import {
   writeListToStorage,
 } from '../../core/list-storage.utils';
 import { AdditionalDate } from '../../core/additional-date.model';
+import { trimField, normalizeAlternativeTitles, normalizeAdditionalDates } from '../../core/update-doc.utils';
 import { Game } from './game.model';
 import { GameDetail, GameWithDetails } from './game-detail.model';
 
@@ -92,30 +93,16 @@ export class GamesService {
   ): Promise<void> {
     const mainRef = doc(this.db, COLLECTION_ID, game.id);
     const detailsRef = doc(this.db, COLLECTION_ID, game.id, 'Details', 'Details');
-    const trim = (value: string | null | undefined) => (value ?? '').trim();
-    const trimmedEndDate = trim(updates.endDate);
-    const trimmedProgress = trim(updates.progress);
-    const trimmedRating = trim(updates.rating);
-    const trimmedStartDate = trim(updates.startDate);
-    const trimmedPlatform = trim(updates.platform);
-    const trimmedReleaseYear = trim(updates.releaseYear);
-    const trimmedOpenCriticID = trim(updates.openCriticID);
-    const trimmedOpenCriticURL = trim(updates.openCriticURL);
-    const normalizedAlternativeTitles = (updates.alternativeTitles ?? [])
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
-    const normalizedAdditionalDates = (updates.additionalDates ?? [])
-      .map(date => {
-        const trimmedComment = trim(date.dateComment);
-        const trimmedAdditionalStartDate = trim(date.startDate);
-        const trimmedAdditionalEndDate = trim(date.endDate);
-        return {
-          dateComment: trimmedComment,
-          startDate: trimmedAdditionalStartDate,
-          ...(trimmedAdditionalEndDate ? { endDate: trimmedAdditionalEndDate } : {}),
-        };
-      })
-      .filter(date => date.dateComment || date.startDate || date.endDate);
+    const trimmedEndDate = trimField(updates.endDate);
+    const trimmedProgress = trimField(updates.progress);
+    const trimmedRating = trimField(updates.rating);
+    const trimmedStartDate = trimField(updates.startDate);
+    const trimmedPlatform = trimField(updates.platform);
+    const trimmedReleaseYear = trimField(updates.releaseYear);
+    const trimmedOpenCriticID = trimField(updates.openCriticID);
+    const trimmedOpenCriticURL = trimField(updates.openCriticURL);
+    const normalizedAlternativeTitles = normalizeAlternativeTitles(updates.alternativeTitles);
+    const normalizedAdditionalDates = normalizeAdditionalDates(updates.additionalDates);
 
     const mainUpdates: Record<string, unknown> = {
       status: updates.status,
@@ -133,9 +120,9 @@ export class GamesService {
         : { additionalDates: deleteField() }),
     };
 
-    const trimmedDescription = trim(updates.description);
-    const trimmedOpinion = trim(updates.opinion);
-    const trimmedTrivia = trim(updates.trivia);
+    const trimmedDescription = trimField(updates.description);
+    const trimmedOpinion = trimField(updates.opinion);
+    const trimmedTrivia = trimField(updates.trivia);
 
     await Promise.all([
       updateDoc(mainRef, mainUpdates),

@@ -4,8 +4,9 @@ import { firstValueFrom, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Anime } from './anime.model';
 import { AnimeDetail, AnimeWithDetails } from './anime-detail.model';
-import { AdditionalDate } from '../../core/additional-date.model';
 import { collectionData$, collectionDataOnce$, docData$ } from '../../core/firestore.utils';
+import { AdditionalDate } from '../../core/additional-date.model';
+import { trimField, normalizeAlternativeTitles, normalizeAdditionalDates } from '../../core/update-doc.utils';
 import {
   readListFromStorage,
   removeListFromStorage,
@@ -67,28 +68,14 @@ export class AnimeService {
   ): Promise<void> {
     const mainRef = doc(this.db, COLLECTION_ID, anime.id);
     const detailsRef = doc(this.db, COLLECTION_ID, anime.id, 'Details', 'Details');
-    const trim = (value: string | null | undefined) => (value ?? '').trim();
-    const trimmedEndDate = trim(updates.endDate);
-    const trimmedProgress = trim(updates.progress);
-    const trimmedRating = trim(updates.rating);
-    const trimmedStartDate = trim(updates.startDate);
-    const trimmedMalId = trim(updates.malID);
-    const trimmedReleaseYear = trim(updates.releaseYear);
-    const normalizedAlternativeTitles = (updates.alternativeTitles ?? [])
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
-    const normalizedAdditionalDates = (updates.additionalDates ?? [])
-      .map(date => {
-        const trimmedComment = trim(date.dateComment);
-        const trimmedAdditionalStartDate = trim(date.startDate);
-        const trimmedAdditionalEndDate = trim(date.endDate);
-        return {
-          dateComment: trimmedComment,
-          startDate: trimmedAdditionalStartDate,
-          ...(trimmedAdditionalEndDate ? { endDate: trimmedAdditionalEndDate } : {}),
-        };
-      })
-      .filter(date => date.dateComment || date.startDate || date.endDate);
+    const trimmedEndDate = trimField(updates.endDate);
+    const trimmedProgress = trimField(updates.progress);
+    const trimmedRating = trimField(updates.rating);
+    const trimmedStartDate = trimField(updates.startDate);
+    const trimmedMalId = trimField(updates.malID);
+    const trimmedReleaseYear = trimField(updates.releaseYear);
+    const normalizedAlternativeTitles = normalizeAlternativeTitles(updates.alternativeTitles);
+    const normalizedAdditionalDates = normalizeAdditionalDates(updates.additionalDates);
 
     const mainUpdates: Record<string, unknown> = {
       status: updates.status,
@@ -105,9 +92,9 @@ export class AnimeService {
         : { additionalDates: deleteField() }),
     };
 
-    const trimmedDescription = trim(updates.description);
-    const trimmedOpinion = trim(updates.opinion);
-    const trimmedTrivia = trim(updates.trivia);
+    const trimmedDescription = trimField(updates.description);
+    const trimmedOpinion = trimField(updates.opinion);
+    const trimmedTrivia = trimField(updates.trivia);
 
     await Promise.all([
       updateDoc(mainRef, mainUpdates),
