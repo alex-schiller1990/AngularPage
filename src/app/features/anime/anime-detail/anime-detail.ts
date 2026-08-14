@@ -26,6 +26,17 @@ import { MigrateLegacyTriviaPipe } from '../../../shared/migrate-legacy-trivia.p
 })
 export class AnimeDetail {
   private readonly route = inject(ActivatedRoute);
+  private coverUploadInput: HTMLInputElement | null = null;
+  private readonly allowedCoverMimeTypes = new Set([
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/avif',
+    'image/bmp',
+    'image/svg+xml',
+  ]);
+  private readonly allowedCoverExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.bmp', '.svg'];
   protected readonly router = inject(Router);
   private readonly animeService = inject(AnimeService);
   private readonly jikanService = inject(JikanAnimeService);
@@ -34,13 +45,17 @@ export class AnimeDetail {
 
   protected readonly editing = signal(false);
   protected readonly saving = signal(false);
+  protected readonly uploadingCover = signal(false);
   protected readonly draft = signal<AnimeUpdates | null>(null);
   /** True when we arrived via /anime/new — no existing document yet. */
   protected readonly isNew = signal(false);
   /** The name field for a new anime (not part of AnimeUpdates). */
   protected readonly newName = signal('');
+  protected readonly coverPreviewUrl = signal('');
+  protected readonly selectedCoverFileName = signal('');
   /** Holds a save error message to display in the template (new mode only). */
   protected readonly saveError = signal<string | null>(null);
+  protected readonly uploadError = signal<string | null>(null);
   protected readonly statusOptions: Anime['status'][] = ['watching', 'completed', 'dropped', 'on-hold'];
 
   // Frozen initial values passed to <app-rich-editor [value]>.
@@ -66,14 +81,17 @@ export class AnimeDetail {
    * full detail template can render without a separate `@if` block.
    */
   protected readonly displayAnime = computed(() => {
+    const preview = this.coverPreviewUrl();
     const a = this.anime();
-    if (a) return a;
+    if (a) {
+      return preview ? { ...a, coverURL: preview } : a;
+    }
     if (this.isNew()) {
       return {
         id: '',
         name: '',
         title: '',
-        coverURL: '',
+        coverURL: preview,
         status: 'watching' as Anime['status'],
         progress: '',
         startDate: '',
@@ -135,6 +153,9 @@ export class AnimeDetail {
 
   protected startNewEdit(): void {
     this.newName.set('');
+    this.coverPreviewUrl.set('');
+    this.selectedCoverFileName.set('');
+    this.uploadError.set(null);
     this.draft.set({
       status: 'watching',
       progress: '',
@@ -159,6 +180,9 @@ export class AnimeDetail {
     const anime = this.anime();
     if (!anime) return;
 
+    this.coverPreviewUrl.set(anime.coverURL ?? '');
+    this.selectedCoverFileName.set('');
+    this.uploadError.set(null);
     this.draft.set({
       status: this.resolveDraftStatus(anime.status),
       progress: anime.progress ?? '',
@@ -199,6 +223,10 @@ export class AnimeDetail {
     this.draft.set(null);
     this.editing.set(false);
     this.saving.set(false);
+    this.uploadingCover.set(false);
+    this.selectedCoverFileName.set('');
+    this.uploadError.set(null);
+    this.coverPreviewUrl.set(this.anime()?.coverURL ?? '');
   }
 
   protected updateDraftField<K extends keyof AnimeUpdates>(
@@ -276,6 +304,69 @@ export class AnimeDetail {
     });
   }
 
+  protected onCoverFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.coverUploadInput = input;
+    const file = input.files?.[0] ?? null;
+    this.selectedCoverFileName.set(file?.name ?? '');
+    this.uploadError.set(null);
+    if (!file) {
+      return;
+    }
+
+    const lowerCaseName = file.name.toLowerCase();
+    const hasAllowedMimeType = !file.type || this.allowedCoverMimeTypes.has(file.type);
+    const hasAllowedExtension = this.allowedCoverExtensions.some(extension => lowerCaseName.endsWith(extension));
+    if (!hasAllowedMimeType || !hasAllowedExtension) {
+      this.selectedCoverFileName.set('');
+      this.uploadError.set('Please select a supported image file.');
+      input.value = '';
+    }
+  }
+
+  protected canUploadCover(): boolean {
+    if (this.uploadingCover() || this.saving()) {
+      return false;
+    }
+
+    if (!this.selectedCoverFileName()) {
+      return false;
+    }
+
+    return this.isNew() ? !!this.newName().trim() : !!this.anime();
+  }
+
+  protected async uploadCover(): Promise<void> {
+    if (!this.canUploadCover()) {
+      return;
+    }
+
+    const input = this.coverUploadInput;
+    const file = input?.files?.[0] ?? null;
+    if (!file) {
+      return;
+    }
+
+    const uploadTitle = this.isNew()
+      ? encodeURIComponent(this.newName().trim())
+      : this.anime()?.title ?? '';
+    if (!uploadTitle) {
+      return;
+    }
+
+    this.uploadingCover.set(true);
+    this.uploadError.set(null);
+    try {
+      const coverURL = await this.animeService.uploadCover(uploadTitle, file);
+      this.coverPreviewUrl.set(coverURL);
+      this.selectedCoverFileName.set(file.name);
+    } catch (err) {
+      this.uploadError.set(err instanceof Error ? err.message : 'Failed to upload cover image.');
+    } finally {
+      this.uploadingCover.set(false);
+    }
+  }
+
   protected async saveEdit(): Promise<void> {
     const draft = this.draft();
     if (!draft || this.saving()) return;
@@ -285,7 +376,11 @@ export class AnimeDetail {
     try {
       if (this.isNew()) {
         try {
-          const title = await this.animeService.createAnime(this.newName(), draft);
+          const title = await this.animeService.createAnime(this.newName(), {
+            ...draft,
+            coverURL: this.coverPreviewUrl(),
+          });
+          this.cancelEdit();
           await this.router.navigate(['/anime', title]);
         } catch (err) {
           this.saveError.set(err instanceof Error ? err.message : 'Failed to create anime.');
@@ -295,7 +390,10 @@ export class AnimeDetail {
         if (!anime) return;
         await this.animeService.updateAnime(
           { id: anime.id, title: anime.title },
-          draft
+          {
+            ...draft,
+            coverURL: this.coverPreviewUrl(),
+          }
         );
         this.cancelEdit();
       }

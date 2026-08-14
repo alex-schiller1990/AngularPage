@@ -4,6 +4,40 @@
       <div class="mx-auto w-full max-w-[290px] md:mx-0">
         <img [src]="a.coverURL" class="w-full aspect-[290/410] rounded object-cover" alt="{{ a.name }}" />
 
+        @if (editing()) {
+          <div class="mt-4 space-y-3">
+            <label class="block space-y-1 text-sm">
+              <span class="text-gray-600">Cover image</span>
+              <input
+                id="cover-upload-input"
+                type="file"
+                accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.avif,.bmp,.svg"
+                class="block w-full text-sm"
+                (change)="onCoverFileSelected($event)"
+              />
+            </label>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="uploadCover()"
+              [disabled]="!canUploadCover()"
+              aria-label="Upload cover image"
+            >
+              @if (uploadingCover()) {
+                Uploading…
+              } @else {
+                Upload cover
+              }
+            </button>
+            @if (selectedCoverFileName()) {
+              <p class="m-0 text-sm text-gray-600">Selected: {{ selectedCoverFileName() }}</p>
+            }
+            @if (uploadError()) {
+              <p class="m-0 text-sm text-red-600">{{ uploadError() }}</p>
+            }
+          </div>
+        }
+
         <div class="mt-4 space-y-2 pt-1">
           @if (editing() && draft(); as d) {
             <div class="space-y-3 text-sm">

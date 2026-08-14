@@ -1,5 +1,6 @@
 import { inject, Injectable, signal, Signal } from '@angular/core';
 import { collection, deleteField, doc, Firestore, getDoc, limit, query, setDoc, updateDoc, where } from '@angular/fire/firestore';
+import { getDownloadURL, ref, Storage, uploadBytes } from '@angular/fire/storage';
 import { firstValueFrom, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Anime } from './anime.model';
@@ -29,11 +30,13 @@ export interface AnimeUpdates {
   description: string;
   opinion: string;
   trivia: string;
+  coverURL?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AnimeService {
   private readonly db = inject(Firestore);
+  private readonly storage = inject(Storage);
   private readonly col = collection(this.db, COLLECTION_ID);
 
   private readonly listSignal = signal<Anime[]>([]);
@@ -74,7 +77,7 @@ export class AnimeService {
     await setDoc(mainRef, {
       name: name.trim(),
       title,
-      coverURL: '',
+      coverURL: updates.coverURL ?? '',
       status: updates.status,
       progress: updates.progress,
       rating: updates.rating,
@@ -99,7 +102,7 @@ export class AnimeService {
       id: title,
       name: name.trim(),
       title,
-      coverURL: '',
+      coverURL: updates.coverURL ?? '',
       status: updates.status,
       progress: updates.progress,
       rating: updates.rating,
@@ -109,6 +112,12 @@ export class AnimeService {
     this.listSignal.update(list => [newAnime, ...list]);
     writeListToStorage(LIST_STORAGE_KEY, this.listSignal());
     return title;
+  }
+
+  async uploadCover(title: string, file: File): Promise<string> {
+    const storageRef = ref(this.storage, `anime/${title}/${file.name}`);
+    await uploadBytes(storageRef, file, { contentType: file.type });
+    return getDownloadURL(storageRef);
   }
 
   async updateAnime(
@@ -132,6 +141,7 @@ export class AnimeService {
       rating: trimmedRating,
       startDate: trimmedStartDate,
       releaseYear: trimmedReleaseYear,
+      coverURL: trimField(updates.coverURL) ?? '',
       ...(trimmedEndDate ? { endDate: trimmedEndDate } : { endDate: deleteField() }),
       ...(normalizedAlternativeTitles.length
         ? { alternativeTitles: normalizedAlternativeTitles }
@@ -167,6 +177,7 @@ export class AnimeService {
           rating: trimmedRating,
           startDate: trimmedStartDate,
           releaseYear: trimmedReleaseYear,
+          coverURL: trimField(updates.coverURL) ?? '',
           ...(trimmedEndDate ? { endDate: trimmedEndDate } : {}),
           ...(normalizedAlternativeTitles.length ? { alternativeTitles: normalizedAlternativeTitles } : {}),
           ...(normalizedAdditionalDates.length ? { additionalDates: normalizedAdditionalDates } : {}),
