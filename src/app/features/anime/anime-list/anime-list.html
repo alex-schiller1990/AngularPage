@@ -1,18 +1,28 @@
 <div class="p-6">
   <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
     <h1 class="text-2xl font-semibold">Anime</h1>
-    <button
-      type="button"
-      (click)="refreshList()"
-      [disabled]="animeService.listLoading()"
-      class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      @if (animeService.listLoading()) {
-        Refreshing…
-      } @else {
-        Refresh from Firebase
+    <div class="flex items-center gap-2">
+      @if (authService.user()) {
+        <a
+          routerLink="/anime/new"
+          class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          Add
+        </a>
       }
-    </button>
+      <button
+        type="button"
+        (click)="refreshList()"
+        [disabled]="animeService.listLoading()"
+        class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        @if (animeService.listLoading()) {
+          Refreshing…
+        } @else {
+          Refresh from Firebase
+        }
+      </button>
+    </div>
   </div>
 
   <div class="mb-6 space-y-2">

@@ -14,6 +14,12 @@ export const routes: Routes = [
         .then(m => m.AnimeList),
   },
   {
+    path: 'anime/new',
+    loadComponent: () =>
+      import('./features/anime/anime-detail/anime-detail')
+        .then(m => m.AnimeDetail),
+  },
+  {
     path: 'anime/:id',
     loadComponent: () =>
       import('./features/anime/anime-detail/anime-detail')

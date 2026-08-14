@@ -1,6 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -26,6 +26,7 @@ import { MigrateLegacyTriviaPipe } from '../../../shared/migrate-legacy-trivia.p
 })
 export class AnimeDetail {
   private readonly route = inject(ActivatedRoute);
+  protected readonly router = inject(Router);
   private readonly animeService = inject(AnimeService);
   private readonly jikanService = inject(JikanAnimeService);
 
@@ -34,6 +35,12 @@ export class AnimeDetail {
   protected readonly editing = signal(false);
   protected readonly saving = signal(false);
   protected readonly draft = signal<AnimeUpdates | null>(null);
+  /** True when we arrived via /anime/new — no existing document yet. */
+  protected readonly isNew = signal(false);
+  /** The name field for a new anime (not part of AnimeUpdates). */
+  protected readonly newName = signal('');
+  /** Holds a save error message to display in the template (new mode only). */
+  protected readonly saveError = signal<string | null>(null);
   protected readonly statusOptions: Anime['status'][] = ['watching', 'completed', 'dropped', 'on-hold'];
 
   // Frozen initial values passed to <app-rich-editor [value]>.
@@ -44,7 +51,7 @@ export class AnimeDetail {
   protected initialTrivia = '';
 
   private readonly paramMap = toSignal(this.route.paramMap);
-  /** URL param is the anime title (e.g. /anime/abc → title 'abc'). */
+  /** URL param is the anime title (e.g. /anime/abc → title 'abc'). Null for /anime/new. */
   private readonly titleParam = computed(() => this.paramMap()?.get('id') ?? null);
   private readonly animeSignal = computed(() => {
     const title = this.titleParam();
@@ -53,6 +60,30 @@ export class AnimeDetail {
 
   /** Flattened anime with details for the current route id. */
   protected readonly anime = computed(() => this.animeSignal()?.() ?? null);
+
+  /**
+   * Returns the real anime when loaded, or an empty shell in new mode so the
+   * full detail template can render without a separate `@if` block.
+   */
+  protected readonly displayAnime = computed(() => {
+    const a = this.anime();
+    if (a) return a;
+    if (this.isNew()) {
+      return {
+        id: '',
+        name: '',
+        title: '',
+        coverURL: '',
+        status: 'watching' as Anime['status'],
+        progress: '',
+        startDate: '',
+        rating: '',
+        releaseYear: '',
+        details: { description: '', opinion: '', trivia: '', malID: '' },
+      };
+    }
+    return null;
+  });
 
   private readonly malId = computed(() => this.anime()?.details.malID?.trim() ?? null);
 
@@ -70,8 +101,15 @@ export class AnimeDetail {
     });
 
     effect(() => {
-      this.titleParam();
-      this.cancelEdit();
+      const title = this.titleParam();
+      // /anime/new has no :id param → title is null
+      if (title === null) {
+        this.isNew.set(true);
+        this.startNewEdit();
+      } else {
+        this.isNew.set(false);
+        this.cancelEdit();
+      }
     });
   }
 
@@ -93,6 +131,28 @@ export class AnimeDetail {
 
   protected isPerfectRating(rating: string | null | undefined): boolean {
     return isSharedPerfectRating(rating);
+  }
+
+  protected startNewEdit(): void {
+    this.newName.set('');
+    this.draft.set({
+      status: 'watching',
+      progress: '',
+      rating: '',
+      startDate: '',
+      endDate: '',
+      malID: '',
+      releaseYear: '',
+      alternativeTitles: [],
+      additionalDates: [],
+      description: '',
+      opinion: '',
+      trivia: '',
+    });
+    this.initialDescription = '';
+    this.initialOpinion = '';
+    this.initialTrivia = '';
+    this.editing.set(true);
   }
 
   protected startEdit(): void {
@@ -217,17 +277,28 @@ export class AnimeDetail {
   }
 
   protected async saveEdit(): Promise<void> {
-    const anime = this.anime();
     const draft = this.draft();
-    if (!anime || !draft || this.saving()) return;
+    if (!draft || this.saving()) return;
 
     this.saving.set(true);
+    this.saveError.set(null);
     try {
-      await this.animeService.updateAnime(
-        { id: anime.id, title: anime.title },
-        draft
-      );
-      this.cancelEdit();
+      if (this.isNew()) {
+        try {
+          const title = await this.animeService.createAnime(this.newName(), draft);
+          await this.router.navigate(['/anime', title]);
+        } catch (err) {
+          this.saveError.set(err instanceof Error ? err.message : 'Failed to create anime.');
+        }
+      } else {
+        const anime = this.anime();
+        if (!anime) return;
+        await this.animeService.updateAnime(
+          { id: anime.id, title: anime.title },
+          draft
+        );
+        this.cancelEdit();
+      }
     } finally {
       this.saving.set(false);
     }

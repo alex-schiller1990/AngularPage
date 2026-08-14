@@ -1,5 +1,6 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 import { getNewestDateTimestamp } from '../../../core/date-sort.utils';
 import {
   accumulateFacetCounts,
@@ -31,6 +32,7 @@ import { Anime } from '../anime.model';
 })
 export class AnimeList {
   protected readonly animeService = inject(AnimeService);
+  protected readonly authService = inject(AuthService);
   protected readonly searchQuery = signal('');
   protected readonly filtersContainer = viewChild<ElementRef<HTMLElement>>('filtersContainer');
   protected readonly selectedStatuses = signal<Set<string>>(new Set());

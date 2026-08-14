@@ -1,5 +1,5 @@
 import { inject, Injectable, signal, Signal } from '@angular/core';
-import { collection, deleteField, doc, Firestore, limit, query, updateDoc, where } from '@angular/fire/firestore';
+import { collection, deleteField, doc, Firestore, getDoc, limit, query, setDoc, updateDoc, where } from '@angular/fire/firestore';
 import { firstValueFrom, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Anime } from './anime.model';
@@ -60,6 +60,55 @@ export class AnimeService {
   refreshList(): void {
     removeListFromStorage(LIST_STORAGE_KEY);
     void this.fetchList();
+  }
+
+  async createAnime(name: string, updates: AnimeUpdates): Promise<string> {
+    const title = encodeURIComponent(name.trim());
+    const mainRef = doc(this.col, title);
+
+    const existing = await getDoc(mainRef);
+    if (existing.exists()) {
+      throw new Error(`An anime with the title "${name.trim()}" already exists.`);
+    }
+
+    await setDoc(mainRef, {
+      name: name.trim(),
+      title,
+      coverURL: '',
+      status: updates.status,
+      progress: updates.progress,
+      rating: updates.rating,
+      startDate: updates.startDate,
+      ...(updates.endDate ? { endDate: updates.endDate } : {}),
+      releaseYear: updates.releaseYear,
+      ...(updates.alternativeTitles.filter(t => t.trim()).length
+        ? { alternativeTitles: updates.alternativeTitles.filter(t => t.trim()) }
+        : {}),
+      ...(updates.additionalDates.length ? { additionalDates: updates.additionalDates } : {}),
+    });
+
+    const detailsRef = doc(this.db, COLLECTION_ID, title, 'Details', 'Details');
+    await setDoc(detailsRef, {
+      malID: updates.malID,
+      ...(updates.description ? { description: updates.description } : {}),
+      ...(updates.opinion ? { opinion: updates.opinion } : {}),
+      ...(updates.trivia ? { trivia: updates.trivia } : {}),
+    });
+
+    const newAnime: import('./anime.model').Anime = {
+      id: title,
+      name: name.trim(),
+      title,
+      coverURL: '',
+      status: updates.status,
+      progress: updates.progress,
+      rating: updates.rating,
+      startDate: updates.startDate,
+      releaseYear: updates.releaseYear,
+    };
+    this.listSignal.update(list => [newAnime, ...list]);
+    writeListToStorage(LIST_STORAGE_KEY, this.listSignal());
+    return title;
   }
 
   async updateAnime(

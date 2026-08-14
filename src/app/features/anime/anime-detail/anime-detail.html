@@ -1,4 +1,4 @@
-@if (anime(); as a) {
+@if (displayAnime(); as a) {
   <mat-card class="mx-auto mt-6 max-w-5xl p-6">
     <div class="flex flex-col gap-6 md:flex-row md:items-start">
       <div class="mx-auto w-full max-w-[290px] md:mx-0">
@@ -258,7 +258,17 @@
 
       <div class="flex-1">
         <div class="mb-2 flex flex-wrap items-start justify-between gap-3">
-          <h1 class="text-2xl font-bold">{{ a.name }}</h1>
+          @if (isNew()) {
+            <input
+              type="text"
+              class="text-2xl font-bold rounded-md border border-gray-300 px-2 py-1"
+              placeholder="Anime name"
+              [value]="newName()"
+              (input)="newName.set($any($event.target).value)"
+            />
+          } @else {
+            <h1 class="text-2xl font-bold">{{ a.name }}</h1>
+          }
 
           @if (editing() && draft(); as d) {
             <div class="mt-1 w-full space-y-2">
@@ -296,7 +306,7 @@
           }
 
           @if (auth.user()) {
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               @if (editing()) {
                 <button
                   mat-stroked-button
@@ -321,6 +331,9 @@
                     Save
                   }
                 </button>
+                @if (saveError()) {
+                  <p class="m-0 text-sm text-red-600">{{ saveError() }}</p>
+                }
               } @else {
                 <button
                   mat-stroked-button
