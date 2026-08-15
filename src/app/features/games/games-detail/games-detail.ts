@@ -10,10 +10,22 @@ import { GamesService, GameUpdates } from '../games.service';
 import { Game } from '../game.model';
 import { OpenCriticService } from '../opencritic.service';
 import {
+  formatStatusLabel,
   getRatingBadgeClasses as getSharedRatingBadgeClasses,
   getStatusBadgeClasses as getSharedStatusBadgeClasses,
-  isPerfectRating as isSharedPerfectRating
+  isPerfectRating as isSharedPerfectRating,
+  resolveDraftStatus,
 } from '../../../shared/badge-styles.utils';
+import {
+  addAdditionalDate,
+  addAlternativeTitle,
+  applyDraftMutation,
+  removeAdditionalDate,
+  removeAlternativeTitle,
+  updateAdditionalDateField,
+  updateAlternativeTitle,
+} from '../../../shared/detail-draft.utils';
+import { CoverUploadState } from '../../../shared/cover-upload.state';
 import { RichEditorComponent } from '../../../shared/rich-editor/rich-editor';
 import { MigrateLegacyTriviaPipe } from '../../../shared/migrate-legacy-trivia.pipe';
 
@@ -26,17 +38,6 @@ import { MigrateLegacyTriviaPipe } from '../../../shared/migrate-legacy-trivia.p
 })
 export class GamesDetail {
   private readonly route = inject(ActivatedRoute);
-  private coverUploadInput: HTMLInputElement | null = null;
-  private readonly allowedCoverMimeTypes = new Set([
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-    'image/gif',
-    'image/avif',
-    'image/bmp',
-    'image/svg+xml',
-  ]);
-  private readonly allowedCoverExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.bmp', '.svg'];
   protected readonly router = inject(Router);
   private readonly gamesService = inject(GamesService);
   private readonly openCriticService = inject(OpenCriticService);
@@ -45,18 +46,18 @@ export class GamesDetail {
 
   protected readonly editing = signal(false);
   protected readonly saving = signal(false);
-  protected readonly uploadingCover = signal(false);
   protected readonly draft = signal<GameUpdates | null>(null);
   /** True when we arrived via /games/new — no existing document yet. */
   protected readonly isNew = signal(false);
   /** The name field for a new game (not part of GameUpdates). */
   protected readonly newName = signal('');
-  protected readonly coverPreviewUrl = signal('');
-  protected readonly selectedCoverFileName = signal('');
   /** Holds a save error message to display in the template (new mode only). */
   protected readonly saveError = signal<string | null>(null);
-  protected readonly uploadError = signal<string | null>(null);
-  protected readonly statusOptions: Game['status'][] = ['playing', 'completed', 'dropped', 'on-hold', 'played'];
+  protected readonly statusOptions: readonly Game['status'][] = ['playing', 'completed', 'dropped', 'on-hold', 'played'];
+
+  protected readonly coverUpload = new CoverUploadState(
+    (title, file) => this.gamesService.uploadCover(title, file)
+  );
 
   // Frozen initial values passed to <app-rich-editor [value]>.
   // Set once when editing starts and never changed — binding [value] to a
@@ -81,7 +82,7 @@ export class GamesDetail {
    * full detail template can render without a separate `@if` block.
    */
   protected readonly displayGame = computed(() => {
-    const preview = this.coverPreviewUrl();
+    const preview = this.coverUpload.previewUrl();
     const g = this.game();
     if (g) {
       return preview ? { ...g, coverURL: preview } : g;
@@ -137,7 +138,7 @@ export class GamesDetail {
   protected readonly openCriticError = computed(() => this.openCriticCache()?.error() ?? null);
 
   protected formatStatusLabel(status: string): string {
-    return status.replaceAll('-', ' ');
+    return formatStatusLabel(status);
   }
 
   protected getStatusBadgeClasses(status: string): string {
@@ -152,11 +153,34 @@ export class GamesDetail {
     return isSharedPerfectRating(rating);
   }
 
+  // --- Cover upload (delegated to CoverUploadState) ---
+
+  protected get uploadingCover() { return this.coverUpload.uploading; }
+  protected get selectedCoverFileName() { return this.coverUpload.selectedFileName; }
+  protected get uploadError() { return this.coverUpload.error; }
+
+  protected onCoverFileSelected(event: Event): void {
+    this.coverUpload.onFileSelected(event);
+  }
+
+  protected canUploadCover(): boolean {
+    const readyCondition = this.isNew() ? !!this.newName().trim() : !!this.game();
+    return !this.saving() && this.coverUpload.canUpload(readyCondition);
+  }
+
+  protected async uploadCover(): Promise<void> {
+    if (!this.canUploadCover()) return;
+    const title = this.isNew()
+      ? encodeURIComponent(this.newName().trim())
+      : this.game()?.title ?? '';
+    await this.coverUpload.upload(title);
+  }
+
+  // --- Edit lifecycle ---
+
   protected startNewEdit(): void {
     this.newName.set('');
-    this.coverPreviewUrl.set('');
-    this.selectedCoverFileName.set('');
-    this.uploadError.set(null);
+    this.coverUpload.reset();
     this.draft.set({
       status: 'playing',
       progress: '',
@@ -183,8 +207,9 @@ export class GamesDetail {
     const game = this.game();
     if (!game) return;
 
+    this.coverUpload.reset(game.coverURL ?? '');
     this.draft.set({
-      status: this.resolveDraftStatus(game.status),
+      status: resolveDraftStatus(game.status, this.statusOptions, 'playing'),
       progress: game.progress ?? '',
       rating: game.rating ?? '',
       startDate: game.startDate ?? '',
@@ -209,165 +234,44 @@ export class GamesDetail {
     this.editing.set(true);
   }
 
-  private resolveDraftStatus(status: string | null | undefined): Game['status'] {
-    const normalized = (status ?? '')
-      .trim()
-      .toLowerCase()
-      .replaceAll('_', '-')
-      .replaceAll(' ', '-');
-
-    return this.statusOptions.includes(normalized as Game['status'])
-      ? (normalized as Game['status'])
-      : 'playing';
-  }
-
   protected cancelEdit(): void {
     this.draft.set(null);
     this.editing.set(false);
     this.saving.set(false);
-    this.uploadingCover.set(false);
-    this.selectedCoverFileName.set('');
-    this.uploadError.set(null);
-    this.coverPreviewUrl.set(this.game()?.coverURL ?? '');
+    this.coverUpload.reset(this.game()?.coverURL ?? '');
   }
 
-  protected updateDraftField<K extends keyof GameUpdates>(
-    key: K,
-    value: GameUpdates[K]
-  ): void {
+  // --- Draft field mutations ---
+
+  protected updateDraftField<K extends keyof GameUpdates>(key: K, value: GameUpdates[K]): void {
     this.draft.update(current => (current ? { ...current, [key]: value } : current));
   }
 
   protected addAlternativeTitle(): void {
-    this.draft.update(current =>
-      current
-        ? { ...current, alternativeTitles: [...current.alternativeTitles, ''] }
-        : current
-    );
+    this.draft.update(applyDraftMutation(addAlternativeTitle));
   }
 
   protected removeAlternativeTitle(index: number): void {
-    this.draft.update(current =>
-      current
-        ? { ...current, alternativeTitles: current.alternativeTitles.filter((_, i) => i !== index) }
-        : current
-    );
+    this.draft.update(applyDraftMutation(d => removeAlternativeTitle(d, index)));
   }
 
   protected updateAlternativeTitle(index: number, value: string): void {
-    this.draft.update(current => {
-      if (!current) return current;
-      return {
-        ...current,
-        alternativeTitles: current.alternativeTitles.map((t, i) => (i === index ? value : t)),
-      };
-    });
+    this.draft.update(applyDraftMutation(d => updateAlternativeTitle(d, index, value)));
   }
 
   protected addAdditionalDate(): void {
-    this.draft.update(current =>
-      current
-        ? {
-            ...current,
-            additionalDates: [
-              ...current.additionalDates,
-              { dateComment: '', startDate: '', endDate: '' },
-            ],
-          }
-        : current
-    );
+    this.draft.update(applyDraftMutation(addAdditionalDate));
   }
 
   protected removeAdditionalDate(index: number): void {
-    this.draft.update(current =>
-      current
-        ? {
-            ...current,
-            additionalDates: current.additionalDates.filter((_, i) => i !== index),
-          }
-        : current
-    );
+    this.draft.update(applyDraftMutation(d => removeAdditionalDate(d, index)));
   }
 
-  protected updateAdditionalDateField(
-    index: number,
-    key: keyof AdditionalDate,
-    value: string
-  ): void {
-    this.draft.update(current => {
-      if (!current) return current;
-
-      return {
-        ...current,
-        additionalDates: current.additionalDates.map((date, i) =>
-          i === index ? { ...date, [key]: value } : date
-        ),
-      };
-    });
+  protected updateAdditionalDateField(index: number, key: keyof AdditionalDate, value: string): void {
+    this.draft.update(applyDraftMutation(d => updateAdditionalDateField(d, index, key, value)));
   }
 
-  protected onCoverFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.coverUploadInput = input;
-    const file = input.files?.[0] ?? null;
-    this.selectedCoverFileName.set(file?.name ?? '');
-    this.uploadError.set(null);
-    if (!file) {
-      return;
-    }
-
-    const lowerCaseName = file.name.toLowerCase();
-    const hasAllowedMimeType = !file.type || this.allowedCoverMimeTypes.has(file.type);
-    const hasAllowedExtension = this.allowedCoverExtensions.some(extension => lowerCaseName.endsWith(extension));
-    if (!hasAllowedMimeType || !hasAllowedExtension) {
-      this.selectedCoverFileName.set('');
-      this.uploadError.set('Please select a supported image file.');
-      input.value = '';
-    }
-  }
-
-  protected canUploadCover(): boolean {
-    if (this.uploadingCover() || this.saving()) {
-      return false;
-    }
-
-    if (!this.selectedCoverFileName()) {
-      return false;
-    }
-
-    return this.isNew() ? !!this.newName().trim() : !!this.game();
-  }
-
-  protected async uploadCover(): Promise<void> {
-    if (!this.canUploadCover()) {
-      return;
-    }
-
-    const input = this.coverUploadInput;
-    const file = input?.files?.[0] ?? null;
-    if (!file) {
-      return;
-    }
-
-    const uploadTitle = this.isNew()
-      ? encodeURIComponent(this.newName().trim())
-      : this.game()?.title ?? '';
-    if (!uploadTitle) {
-      return;
-    }
-
-    this.uploadingCover.set(true);
-    this.uploadError.set(null);
-    try {
-      const coverURL = await this.gamesService.uploadCover(uploadTitle, file);
-      this.coverPreviewUrl.set(coverURL);
-      this.selectedCoverFileName.set(file.name);
-    } catch (err) {
-      this.uploadError.set(err instanceof Error ? err.message : 'Failed to upload cover image.');
-    } finally {
-      this.uploadingCover.set(false);
-    }
-  }
+  // --- Save ---
 
   protected async saveEdit(): Promise<void> {
     const draft = this.draft();
@@ -380,7 +284,7 @@ export class GamesDetail {
         try {
           const title = await this.gamesService.createGame(this.newName(), {
             ...draft,
-            coverURL: this.coverPreviewUrl(),
+            coverURL: this.coverUpload.previewUrl(),
           });
           this.cancelEdit();
           await this.router.navigate(['/games', title]);

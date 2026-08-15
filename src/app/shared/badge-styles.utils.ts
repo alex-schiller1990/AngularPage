@@ -65,3 +65,28 @@ export function isPerfectRating(rating: string | null | undefined): boolean {
 
   return Number(rating) === 10;
 }
+
+/** Converts a kebab-case status string to a display label, e.g. "on-hold" → "on hold". */
+export function formatStatusLabel(status: string): string {
+  return status.replaceAll('-', ' ');
+}
+
+/**
+ * Normalises a raw status value to the nearest valid option, falling back to
+ * `defaultStatus` if none matches.
+ */
+export function resolveDraftStatus<T extends string>(
+  status: string | null | undefined,
+  validOptions: readonly T[],
+  defaultStatus: T
+): T {
+  const normalized = (status ?? '')
+    .trim()
+    .toLowerCase()
+    .replaceAll('_', '-')
+    .replaceAll(' ', '-');
+
+  return (validOptions as readonly string[]).includes(normalized)
+    ? (normalized as T)
+    : defaultStatus;
+}

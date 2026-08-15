@@ -13,6 +13,7 @@ import {
   toggleValueInSet
 } from '../../../core/filter.utils';
 import {
+  formatStatusLabel as sharedFormatStatusLabel,
   getStatusBadgeClasses as getSharedStatusBadgeClasses,
   getRatingBadgeClasses as getSharedRatingBadgeClasses,
   isPerfectRating as isSharedPerfectRating
@@ -192,7 +193,7 @@ export class AnimeList {
   }
 
   protected formatStatusLabel(status: string): string {
-    return status.replace('-', ' ');
+    return sharedFormatStatusLabel(status);
   }
 
   protected getStatusBadgeClasses(status: string): string {
