@@ -32,6 +32,12 @@ export const routes: Routes = [
         .then(m => m.GamesList),
   },
   {
+    path: 'games/new',
+    loadComponent: () =>
+      import('./features/games/games-detail/games-detail')
+        .then(m => m.GamesDetail),
+  },
+  {
     path: 'games/:id',
     loadComponent: () =>
       import('./features/games/games-detail/games-detail')

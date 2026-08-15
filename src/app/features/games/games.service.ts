@@ -1,5 +1,6 @@
 import { inject, Injectable, signal, Signal } from '@angular/core';
-import { collection, deleteField, doc, Firestore, limit, query, updateDoc, where } from '@angular/fire/firestore';
+import { collection, deleteField, doc, Firestore, getDoc, limit, query, setDoc, updateDoc, where } from '@angular/fire/firestore';
+import { getDownloadURL, ref, Storage, uploadBytes } from '@angular/fire/storage';
 import { firstValueFrom, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { collectionData$, collectionDataOnce$, docData$ } from '../../core/firestore.utils';
@@ -36,6 +37,7 @@ const LIST_STORAGE_KEY = 'angular-page.games.list';
 @Injectable({ providedIn: 'root' })
 export class GamesService {
   private readonly db = inject(Firestore);
+  private readonly storage = inject(Storage);
   private readonly col = collection(this.db, COLLECTION_ID);
 
   private readonly listSignal = signal<Game[]>([]);
@@ -85,6 +87,64 @@ export class GamesService {
     stream.subscribe(value => sig.set(value));
     this.detailByTitleCache.set(title, sig);
     return sig;
+  }
+
+  async createGame(name: string, updates: GameUpdates & { coverURL?: string }): Promise<string> {
+    const title = encodeURIComponent(name.trim());
+    const mainRef = doc(this.col, title);
+
+    const existing = await getDoc(mainRef);
+    if (existing.exists()) {
+      throw new Error(`A game with the title "${name.trim()}" already exists.`);
+    }
+
+    await setDoc(mainRef, {
+      name: name.trim(),
+      title,
+      coverURL: updates.coverURL ?? '',
+      status: updates.status,
+      progress: updates.progress,
+      rating: updates.rating,
+      startDate: updates.startDate,
+      ...(updates.endDate ? { endDate: updates.endDate } : {}),
+      releaseYear: updates.releaseYear,
+      platform: updates.platform,
+      ...(updates.alternativeTitles.filter(t => t.trim()).length
+        ? { alternativeTitles: updates.alternativeTitles.filter(t => t.trim()) }
+        : {}),
+      ...(updates.additionalDates.length ? { additionalDates: updates.additionalDates } : {}),
+    });
+
+    const detailsRef = doc(this.db, COLLECTION_ID, title, 'Details', 'Details');
+    await setDoc(detailsRef, {
+      ...(updates.openCriticID ? { openCriticID: updates.openCriticID } : {}),
+      ...(updates.openCriticURL ? { openCriticURL: updates.openCriticURL } : {}),
+      ...(updates.description ? { description: updates.description } : {}),
+      ...(updates.opinion ? { opinion: updates.opinion } : {}),
+      ...(updates.trivia ? { trivia: updates.trivia } : {}),
+    });
+
+    const newGame: Game = {
+      id: title,
+      name: name.trim(),
+      title,
+      coverURL: updates.coverURL ?? '',
+      status: updates.status,
+      progress: updates.progress,
+      rating: updates.rating,
+      startDate: updates.startDate,
+      releaseYear: updates.releaseYear,
+      platform: updates.platform,
+    };
+    this.listSignal.update(list => [newGame, ...list]);
+    writeListToStorage(LIST_STORAGE_KEY, this.listSignal());
+    return title;
+  }
+
+  async uploadCover(title: string, file: File): Promise<string> {
+    const storageRef = ref(this.storage, `games/${title}/${file.name}`);
+    await uploadBytes(storageRef, file, { contentType: file.type });
+    return getDownloadURL(storageRef);
   }
 
   async updateGame(

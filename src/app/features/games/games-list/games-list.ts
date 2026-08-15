@@ -1,5 +1,6 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 import { getNewestDateTimestamp } from '../../../core/date-sort.utils';
 import {
   getCoveredYears,
@@ -28,6 +29,7 @@ import { Game } from '../game.model';
 })
 export class GamesList {
   protected readonly gamesService = inject(GamesService);
+  protected readonly authService = inject(AuthService);
   protected readonly searchQuery = signal('');
   protected readonly filtersContainer = viewChild<ElementRef<HTMLElement>>('filtersContainer');
   protected readonly selectedStatuses = signal<Set<string>>(new Set());

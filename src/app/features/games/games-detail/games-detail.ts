@@ -1,7 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -26,6 +26,18 @@ import { MigrateLegacyTriviaPipe } from '../../../shared/migrate-legacy-trivia.p
 })
 export class GamesDetail {
   private readonly route = inject(ActivatedRoute);
+  private coverUploadInput: HTMLInputElement | null = null;
+  private readonly allowedCoverMimeTypes = new Set([
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/avif',
+    'image/bmp',
+    'image/svg+xml',
+  ]);
+  private readonly allowedCoverExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.bmp', '.svg'];
+  protected readonly router = inject(Router);
   private readonly gamesService = inject(GamesService);
   private readonly openCriticService = inject(OpenCriticService);
 
@@ -33,7 +45,17 @@ export class GamesDetail {
 
   protected readonly editing = signal(false);
   protected readonly saving = signal(false);
+  protected readonly uploadingCover = signal(false);
   protected readonly draft = signal<GameUpdates | null>(null);
+  /** True when we arrived via /games/new — no existing document yet. */
+  protected readonly isNew = signal(false);
+  /** The name field for a new game (not part of GameUpdates). */
+  protected readonly newName = signal('');
+  protected readonly coverPreviewUrl = signal('');
+  protected readonly selectedCoverFileName = signal('');
+  /** Holds a save error message to display in the template (new mode only). */
+  protected readonly saveError = signal<string | null>(null);
+  protected readonly uploadError = signal<string | null>(null);
   protected readonly statusOptions: Game['status'][] = ['playing', 'completed', 'dropped', 'on-hold', 'played'];
 
   // Frozen initial values passed to <app-rich-editor [value]>.
@@ -44,7 +66,7 @@ export class GamesDetail {
   protected initialTrivia = '';
 
   private readonly paramMap = toSignal(this.route.paramMap);
-  /** URL param is the game title (e.g. /games/abc → title 'abc'). */
+  /** URL param is the game title (e.g. /games/abc → title 'abc'). Null for /games/new. */
   private readonly titleParam = computed(() => this.paramMap()?.get('id') ?? null);
   private readonly gameSignal = computed(() => {
     const title = this.titleParam();
@@ -53,6 +75,34 @@ export class GamesDetail {
 
   /** Flattened game with details for the current route id. */
   protected readonly game = computed(() => this.gameSignal()?.() ?? null);
+
+  /**
+   * Returns the real game when loaded, or an empty shell in new mode so the
+   * full detail template can render without a separate `@if` block.
+   */
+  protected readonly displayGame = computed(() => {
+    const preview = this.coverPreviewUrl();
+    const g = this.game();
+    if (g) {
+      return preview ? { ...g, coverURL: preview } : g;
+    }
+    if (this.isNew()) {
+      return {
+        id: '',
+        name: '',
+        title: '',
+        coverURL: preview,
+        status: 'playing' as Game['status'],
+        progress: '',
+        startDate: '',
+        rating: '',
+        releaseYear: '',
+        platform: '',
+        details: { id: '', description: '', opinion: '', trivia: '', openCriticID: '', openCriticURL: '' },
+      };
+    }
+    return null;
+  });
 
   private readonly openCriticId = computed(() => this.game()?.details.openCriticID?.trim() ?? null);
 
@@ -70,8 +120,15 @@ export class GamesDetail {
     });
 
     effect(() => {
-      this.titleParam();
-      this.cancelEdit();
+      const title = this.titleParam();
+      // /games/new has no :id param → title is null
+      if (title === null) {
+        this.isNew.set(true);
+        this.startNewEdit();
+      } else {
+        this.isNew.set(false);
+        this.cancelEdit();
+      }
     });
   }
 
@@ -93,6 +150,33 @@ export class GamesDetail {
 
   protected isPerfectRating(rating: string | null | undefined): boolean {
     return isSharedPerfectRating(rating);
+  }
+
+  protected startNewEdit(): void {
+    this.newName.set('');
+    this.coverPreviewUrl.set('');
+    this.selectedCoverFileName.set('');
+    this.uploadError.set(null);
+    this.draft.set({
+      status: 'playing',
+      progress: '',
+      rating: '',
+      startDate: '',
+      endDate: '',
+      platform: '',
+      releaseYear: '',
+      alternativeTitles: [],
+      additionalDates: [],
+      openCriticID: '',
+      openCriticURL: '',
+      description: '',
+      opinion: '',
+      trivia: '',
+    });
+    this.initialDescription = '';
+    this.initialOpinion = '';
+    this.initialTrivia = '';
+    this.editing.set(true);
   }
 
   protected startEdit(): void {
@@ -141,6 +225,10 @@ export class GamesDetail {
     this.draft.set(null);
     this.editing.set(false);
     this.saving.set(false);
+    this.uploadingCover.set(false);
+    this.selectedCoverFileName.set('');
+    this.uploadError.set(null);
+    this.coverPreviewUrl.set(this.game()?.coverURL ?? '');
   }
 
   protected updateDraftField<K extends keyof GameUpdates>(
@@ -218,18 +306,96 @@ export class GamesDetail {
     });
   }
 
+  protected onCoverFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.coverUploadInput = input;
+    const file = input.files?.[0] ?? null;
+    this.selectedCoverFileName.set(file?.name ?? '');
+    this.uploadError.set(null);
+    if (!file) {
+      return;
+    }
+
+    const lowerCaseName = file.name.toLowerCase();
+    const hasAllowedMimeType = !file.type || this.allowedCoverMimeTypes.has(file.type);
+    const hasAllowedExtension = this.allowedCoverExtensions.some(extension => lowerCaseName.endsWith(extension));
+    if (!hasAllowedMimeType || !hasAllowedExtension) {
+      this.selectedCoverFileName.set('');
+      this.uploadError.set('Please select a supported image file.');
+      input.value = '';
+    }
+  }
+
+  protected canUploadCover(): boolean {
+    if (this.uploadingCover() || this.saving()) {
+      return false;
+    }
+
+    if (!this.selectedCoverFileName()) {
+      return false;
+    }
+
+    return this.isNew() ? !!this.newName().trim() : !!this.game();
+  }
+
+  protected async uploadCover(): Promise<void> {
+    if (!this.canUploadCover()) {
+      return;
+    }
+
+    const input = this.coverUploadInput;
+    const file = input?.files?.[0] ?? null;
+    if (!file) {
+      return;
+    }
+
+    const uploadTitle = this.isNew()
+      ? encodeURIComponent(this.newName().trim())
+      : this.game()?.title ?? '';
+    if (!uploadTitle) {
+      return;
+    }
+
+    this.uploadingCover.set(true);
+    this.uploadError.set(null);
+    try {
+      const coverURL = await this.gamesService.uploadCover(uploadTitle, file);
+      this.coverPreviewUrl.set(coverURL);
+      this.selectedCoverFileName.set(file.name);
+    } catch (err) {
+      this.uploadError.set(err instanceof Error ? err.message : 'Failed to upload cover image.');
+    } finally {
+      this.uploadingCover.set(false);
+    }
+  }
+
   protected async saveEdit(): Promise<void> {
-    const game = this.game();
     const draft = this.draft();
-    if (!game || !draft || this.saving()) return;
+    if (!draft || this.saving()) return;
 
     this.saving.set(true);
+    this.saveError.set(null);
     try {
-      await this.gamesService.updateGame(
-        { id: game.id, title: game.title },
-        draft
-      );
-      this.cancelEdit();
+      if (this.isNew()) {
+        try {
+          const title = await this.gamesService.createGame(this.newName(), {
+            ...draft,
+            coverURL: this.coverPreviewUrl(),
+          });
+          this.cancelEdit();
+          await this.router.navigate(['/games', title]);
+        } catch (err) {
+          this.saveError.set(err instanceof Error ? err.message : 'Failed to create game.');
+        }
+      } else {
+        const game = this.game();
+        if (!game) return;
+        await this.gamesService.updateGame(
+          { id: game.id, title: game.title },
+          draft
+        );
+        this.cancelEdit();
+      }
     } finally {
       this.saving.set(false);
     }
