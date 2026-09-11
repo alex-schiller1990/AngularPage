@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "testogromm"
+  },
+  "targets": {
+    "testogromm": {
+      "hosting": {
+        "testogromm": [
+          "testogromm"
+        ]
+      }
+    }
   }
 }

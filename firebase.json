@@ -6,7 +6,8 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "public",
+    "target": "testogromm",
+    "public": "dist/AngularPage/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
