@@ -1,0 +1,228 @@
+@if (review(); as r) {
+  <div class="mx-auto max-w-7xl px-4 py-6">
+    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+      <!-- Sticky Sidebar Navigation (Desktop) -->
+      <aside class="w-full lg:w-64 lg:shrink-0 lg:sticky lg:top-6">
+        <mat-card class="p-4">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3 px-2">
+            Navigation
+          </h2>
+          <nav class="flex flex-col space-y-1 text-sm font-medium">
+            @if (r.intro) {
+              <a href="#intro" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                Intro
+              </a>
+            }
+            @if (r.disappointments) {
+              <a href="#disappointments" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                Disappointments
+              </a>
+            }
+            @if (r.surprises) {
+              <a href="#surprises" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                Surprises
+              </a>
+            }
+            @if (r.highlights) {
+              <a href="#highlights" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                Highlights
+              </a>
+            }
+            @if (r.mostWanted) {
+              <a href="#mostWanted" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                Most Wanted
+              </a>
+            }
+            @if (r.outro) {
+              <a href="#outro" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                Outro
+              </a>
+            }
+          </nav>
+
+          <!-- Action buttons -->
+          <div class="mt-4 pt-4 border-t border-gray-200 flex flex-col gap-2">
+            @if (editing()) {
+              <button mat-raised-button color="primary" (click)="saveEdit()" [disabled]="saving()">
+                {{ saving() ? 'Saving…' : 'Save' }}
+              </button>
+              <button mat-stroked-button (click)="cancelEdit()" [disabled]="saving()">
+                Cancel
+              </button>
+            } @else {
+              @if (auth.user()) {
+                <button mat-stroked-button (click)="startEdit()">Edit</button>
+              }
+              <a
+                mat-stroked-button
+                [routerLink]="type() === 'aoty' ? '/anime' : '/games'"
+                [queryParams]="{ tab: 'year-review' }"
+              >
+                ← Back to {{ type() === 'aoty' ? 'Anime' : 'Games' }}
+              </a>
+            }
+          </div>
+        </mat-card>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 min-w-0 space-y-8">
+        <!-- Page Title Header -->
+        <mat-card class="p-6">
+          <span class="text-xs font-semibold uppercase tracking-wider text-blue-600">
+            {{ type() === 'aoty' ? 'Anime Review' : 'Game Review' }}
+          </span>
+          <h1 class="text-3xl font-extrabold text-gray-900 mt-1">
+            {{ title() }}
+          </h1>
+        </mat-card>
+
+        <!-- New Review: Year + Cover URL inputs (only shown when isNew) -->
+        @if (isNew()) {
+          <mat-card class="p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+              New Year Review
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                <input
+                  class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                  placeholder="e.g. 2024"
+                  [value]="yearInput()"
+                  (input)="yearInput.set($any($event.target).value)"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
+                <input
+                  class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                  placeholder="https://…"
+                  [value]="coverUrlInput()"
+                  (input)="coverUrlInput.set($any($event.target).value)"
+                />
+              </div>
+            </div>
+          </mat-card>
+        }
+
+        <!-- Intro Section -->
+        <section id="intro">
+          <mat-card class="p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+              Intro
+            </h2>
+            @if (editing() && draft()) {
+              <app-rich-editor
+                [value]="initialIntro"
+                (valueChange)="setDraftField('intro', $event)"
+              />
+            } @else {
+              @if (r.intro) {
+                <div class="rich-text text-gray-800" [innerHTML]="r.intro"></div>
+              }
+            }
+          </mat-card>
+        </section>
+
+        <!-- Disappointments Section -->
+        <section id="disappointments">
+          <app-oty-section
+            sectionKey="disappointments"
+            title="Disappointments"
+            [section]="r.disappointments"
+            [editing]="editing()"
+            [draft]="draft()?.disappointments"
+            [initialSectionIntro]="initialSectionIntro['disappointments']"
+            [initialEntryDesc]="initialEntryDesc"
+            (sectionIntroChange)="setSectionField('disappointments', 'intro', $event)"
+            (entryChange)="setEntryField('disappointments', $event.listKey, $event.index, $event.change.field, $event.change.value)"
+            (add)="addEntry('disappointments', $event.listKey)"
+            (remove)="removeEntry('disappointments', $event.listKey, $event.index)"
+            (move)="moveEntry('disappointments', $event.listKey, $event.index, $event.direction)"
+          />
+        </section>
+
+        <!-- Surprises Section -->
+        <section id="surprises">
+          <app-oty-section
+            sectionKey="surprises"
+            title="Surprises"
+            [section]="r.surprises"
+            [editing]="editing()"
+            [draft]="draft()?.surprises"
+            [initialSectionIntro]="initialSectionIntro['surprises']"
+            [initialEntryDesc]="initialEntryDesc"
+            (sectionIntroChange)="setSectionField('surprises', 'intro', $event)"
+            (entryChange)="setEntryField('surprises', $event.listKey, $event.index, $event.change.field, $event.change.value)"
+            (add)="addEntry('surprises', $event.listKey)"
+            (remove)="removeEntry('surprises', $event.listKey, $event.index)"
+            (move)="moveEntry('surprises', $event.listKey, $event.index, $event.direction)"
+          />
+        </section>
+
+        <!-- Highlights Section -->
+        <section id="highlights">
+          <app-oty-section
+            sectionKey="highlights"
+            title="Highlights"
+            [section]="r.highlights"
+            [editing]="editing()"
+            [draft]="draft()?.highlights"
+            [initialSectionIntro]="initialSectionIntro['highlights']"
+            [initialEntryDesc]="initialEntryDesc"
+            (sectionIntroChange)="setSectionField('highlights', 'intro', $event)"
+            (entryChange)="setEntryField('highlights', $event.listKey, $event.index, $event.change.field, $event.change.value)"
+            (add)="addEntry('highlights', $event.listKey)"
+            (remove)="removeEntry('highlights', $event.listKey, $event.index)"
+            (move)="moveEntry('highlights', $event.listKey, $event.index, $event.direction)"
+          />
+        </section>
+
+        <!-- Most Wanted Section -->
+        <section id="mostWanted">
+          <app-oty-section
+            sectionKey="mostWanted"
+            title="Most Wanted"
+            [section]="r.mostWanted"
+            [editing]="editing()"
+            [draft]="draft()?.mostWanted"
+            [initialSectionIntro]="initialSectionIntro['mostWanted']"
+            [initialEntryDesc]="initialEntryDesc"
+            (sectionIntroChange)="setSectionField('mostWanted', 'intro', $event)"
+            (entryChange)="setEntryField('mostWanted', $event.listKey, $event.index, $event.change.field, $event.change.value)"
+            (add)="addEntry('mostWanted', $event.listKey)"
+            (remove)="removeEntry('mostWanted', $event.listKey, $event.index)"
+            (move)="moveEntry('mostWanted', $event.listKey, $event.index, $event.direction)"
+          />
+        </section>
+
+        <!-- Outro Section -->
+        <section id="outro">
+          <mat-card class="p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+              Outro
+            </h2>
+            @if (editing() && draft()) {
+              <app-rich-editor
+                [value]="initialOutro"
+                (valueChange)="setDraftField('outro', $event)"
+              />
+            } @else {
+              @if (r.outro) {
+                <div class="rich-text text-gray-800" [innerHTML]="r.outro"></div>
+              }
+            }
+          </mat-card>
+        </section>
+      </main>
+    </div>
+  </div>
+} @else {
+  <mat-card class="mx-auto mt-12 max-w-lg p-8 text-center">
+    <h2 class="text-2xl font-bold text-gray-800">Review Not Found</h2>
+    <p class="mt-2 text-gray-600">
+      No {{ type() === 'aoty' ? 'Anime' : 'Game' }} of the Year review was found for year {{ year() }}.
+    </p>
+  </mat-card>
+}

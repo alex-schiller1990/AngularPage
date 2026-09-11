@@ -44,6 +44,34 @@ export const routes: Routes = [
         .then(m => m.GamesDetail),
   },
   {
+    path: 'aoty/new',
+    data: { type: 'aoty' },
+    loadComponent: () =>
+      import('./features/of-the-year/of-the-year-detail/of-the-year-detail')
+        .then(m => m.OfTheYearDetail),
+  },
+  {
+    path: 'aoty/:year',
+    data: { type: 'aoty' },
+    loadComponent: () =>
+      import('./features/of-the-year/of-the-year-detail/of-the-year-detail')
+        .then(m => m.OfTheYearDetail),
+  },
+  {
+    path: 'goty/new',
+    data: { type: 'goty' },
+    loadComponent: () =>
+      import('./features/of-the-year/of-the-year-detail/of-the-year-detail')
+        .then(m => m.OfTheYearDetail),
+  },
+  {
+    path: 'goty/:year',
+    data: { type: 'goty' },
+    loadComponent: () =>
+      import('./features/of-the-year/of-the-year-detail/of-the-year-detail')
+        .then(m => m.OfTheYearDetail),
+  },
+  {
     path: '**',
     redirectTo: '',
   }

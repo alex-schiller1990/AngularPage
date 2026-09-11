@@ -1,5 +1,6 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth/auth.service';
 import { getNewestDateTimestamp } from '../../../core/date-sort.utils';
 import {
@@ -23,10 +24,11 @@ import { FilterDropdownComponent } from '../../../shared/filters/filter-dropdown
 import { ActiveFilterChip, FilterOption } from '../../../shared/filters/filter.models';
 import { AnimeService } from '../anime.service';
 import { Anime } from '../anime.model';
+import { AnimeYearReview } from '../anime-year-review/anime-year-review';
 
 @Component({
   selector: 'app-anime-list',
-  imports: [RouterLink, FilterDropdownComponent, ActiveFilterChipsComponent],
+  imports: [RouterLink, FilterDropdownComponent, ActiveFilterChipsComponent, AnimeYearReview],
   templateUrl: './anime-list.html',
   styleUrl: './anime-list.css',
   standalone: true
@@ -34,6 +36,14 @@ import { Anime } from '../anime.model';
 export class AnimeList {
   protected readonly animeService = inject(AnimeService);
   protected readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly queryParamMap = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap
+  });
+  protected readonly activeTab = computed(() =>
+    this.queryParamMap().get('tab') === 'year-review' ? 'year-review' : 'list'
+  );
   protected readonly searchQuery = signal('');
   protected readonly filtersContainer = viewChild<ElementRef<HTMLElement>>('filtersContainer');
   protected readonly selectedStatuses = signal<Set<string>>(new Set());
@@ -135,6 +145,10 @@ export class AnimeList {
   protected readonly filteredAnime = computed(() => {
     return this.sortedAnime().filter((anime: Anime) => this.matchesAllFilters(anime));
   });
+
+  protected switchTab(tab: 'list' | 'year-review'): void {
+    this.router.navigate([], { queryParams: { tab } });
+  }
 
   protected toggleStatus(value: string): void {
     this.selectedStatuses.update((selected) => toggleValueInSet(selected, value));

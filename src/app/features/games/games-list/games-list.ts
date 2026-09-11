@@ -1,5 +1,6 @@
 import { Component, computed, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth/auth.service';
 import { getNewestDateTimestamp } from '../../../core/date-sort.utils';
 import {
@@ -20,10 +21,11 @@ import { FilterDropdownComponent } from '../../../shared/filters/filter-dropdown
 import { ActiveFilterChip, FilterOption } from '../../../shared/filters/filter.models';
 import { GamesService } from '../games.service';
 import { Game } from '../game.model';
+import { GamesYearReview } from '../games-year-review/games-year-review';
 
 @Component({
   selector: 'app-games-list',
-  imports: [RouterLink, FilterDropdownComponent, ActiveFilterChipsComponent],
+  imports: [RouterLink, FilterDropdownComponent, ActiveFilterChipsComponent, GamesYearReview],
   templateUrl: './games-list.html',
   styleUrl: './games-list.css',
   standalone: true
@@ -31,6 +33,14 @@ import { Game } from '../game.model';
 export class GamesList {
   protected readonly gamesService = inject(GamesService);
   protected readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly queryParamMap = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap
+  });
+  protected readonly activeTab = computed(() =>
+    this.queryParamMap().get('tab') === 'year-review' ? 'year-review' : 'list'
+  );
   protected readonly searchQuery = signal('');
   protected readonly filtersContainer = viewChild<ElementRef<HTMLElement>>('filtersContainer');
   protected readonly selectedStatuses = signal<Set<string>>(new Set());
@@ -153,6 +163,10 @@ export class GamesList {
   protected readonly filteredGames = computed(() => {
     return this.sortedGames().filter((game: Game) => this.matchesAllFilters(game));
   });
+
+  protected switchTab(tab: 'list' | 'year-review'): void {
+    this.router.navigate([], { queryParams: { tab } });
+  }
 
   protected toggleStatus(value: string): void {
     this.selectedStatuses.update((selected) => toggleValueInSet(selected, value));

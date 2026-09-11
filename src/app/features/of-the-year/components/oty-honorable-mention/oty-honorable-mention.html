@@ -1,0 +1,26 @@
+<div class="flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-gray-50 border border-gray-200">
+  @if (entry().cover) {
+    <div class="w-full sm:w-24 shrink-0">
+      <img
+        [src]="entry().cover"
+        [alt]="entry().name"
+        class="w-full aspect-[290/410] rounded object-cover shadow-sm"
+        loading="lazy"
+      />
+    </div>
+  }
+  <div class="flex-1 min-w-0">
+    <h5 class="text-base font-semibold text-gray-900">
+      @if (entry().url) {
+        <a [href]="entry().url" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+          {{ entry().name }}
+        </a>
+      } @else {
+        {{ entry().name }}
+      }
+    </h5>
+    @if (entry().description) {
+      <div class="rich-text text-gray-700 mt-1" [innerHTML]="entry().description"></div>
+    }
+  </div>
+</div>

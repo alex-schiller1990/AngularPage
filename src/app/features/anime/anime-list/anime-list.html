@@ -25,6 +25,34 @@
     </div>
   </div>
 
+  <div class="mb-6 flex gap-2 border-b border-gray-200">
+    <button
+      type="button"
+      (click)="switchTab('list')"
+      class="border-b-2 px-4 py-2 text-sm font-medium"
+      [class.border-indigo-600]="activeTab() === 'list'"
+      [class.text-indigo-600]="activeTab() === 'list'"
+      [class.border-transparent]="activeTab() !== 'list'"
+      [class.text-gray-500]="activeTab() !== 'list'"
+    >
+      List
+    </button>
+    <button
+      type="button"
+      (click)="switchTab('year-review')"
+      class="border-b-2 px-4 py-2 text-sm font-medium"
+      [class.border-indigo-600]="activeTab() === 'year-review'"
+      [class.text-indigo-600]="activeTab() === 'year-review'"
+      [class.border-transparent]="activeTab() !== 'year-review'"
+      [class.text-gray-500]="activeTab() !== 'year-review'"
+    >
+      Year Review
+    </button>
+  </div>
+
+  @if (activeTab() === 'year-review') {
+    <app-anime-year-review />
+  } @else {
   <div class="mb-6 space-y-2">
     <div class="relative">
       <input
@@ -174,6 +202,7 @@
         </a>
       }
     </div>
+  }
   }
   
 </div>
