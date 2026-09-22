@@ -9,32 +9,32 @@
           </h2>
           <nav class="flex flex-col space-y-1 text-sm font-medium">
             @if (r.intro) {
-              <a href="#intro" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+              <a [routerLink]="[]" fragment="intro" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
                 Intro
               </a>
             }
             @if (r.disappointments) {
-              <a href="#disappointments" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+              <a [routerLink]="[]" fragment="disappointments" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
                 Disappointments
               </a>
             }
             @if (r.surprises) {
-              <a href="#surprises" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+              <a [routerLink]="[]" fragment="surprises" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
                 Surprises
               </a>
             }
             @if (r.highlights) {
-              <a href="#highlights" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+              <a [routerLink]="[]" fragment="highlights" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
                 Highlights
               </a>
             }
             @if (r.mostWanted) {
-              <a href="#mostWanted" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+              <a [routerLink]="[]" fragment="mostWanted" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
                 Most Wanted
               </a>
             }
             @if (r.outro) {
-              <a href="#outro" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+              <a [routerLink]="[]" fragment="outro" class="rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
                 Outro
               </a>
             }
