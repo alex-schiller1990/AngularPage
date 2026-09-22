@@ -1,5 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,6 +42,7 @@ export class GamesDetail {
   protected readonly router = inject(Router);
   private readonly gamesService = inject(GamesService);
   private readonly openCriticService = inject(OpenCriticService);
+  private readonly titleService = inject(Title);
 
   protected readonly auth = inject(AuthService);
 
@@ -129,6 +131,15 @@ export class GamesDetail {
       } else {
         this.isNew.set(false);
         this.cancelEdit();
+      }
+    });
+
+    effect(() => {
+      const gameName = this.game()?.name;
+      if (gameName) {
+        this.titleService.setTitle(gameName);
+      } else {
+        this.titleService.setTitle('ogromm');
       }
     });
   }

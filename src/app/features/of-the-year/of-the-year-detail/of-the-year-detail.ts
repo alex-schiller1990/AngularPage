@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -28,6 +29,7 @@ export class OfTheYearDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly ofTheYearService = inject(OfTheYearService);
+  private readonly titleService = inject(Title);
   protected readonly auth = inject(AuthService);
 
   private readonly paramMap = toSignal(this.route.paramMap);
@@ -77,6 +79,17 @@ export class OfTheYearDetail {
     effect(() => {
       if (this.isNew() && !this.editing()) {
         this._enterNewDraft();
+      }
+    });
+
+    effect(() => {
+      const isNew = this.isNew();
+      const year = this.year();
+      const type = this.type();
+      if (!isNew && year) {
+        this.titleService.setTitle(`${type} ${year}`);
+      } else {
+        this.titleService.setTitle('ogromm');
       }
     });
   }

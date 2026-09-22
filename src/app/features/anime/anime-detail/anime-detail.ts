@@ -1,5 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -41,6 +42,7 @@ export class AnimeDetail {
   protected readonly router = inject(Router);
   private readonly animeService = inject(AnimeService);
   private readonly jikanService = inject(JikanAnimeService);
+  private readonly titleService = inject(Title);
 
   protected readonly auth = inject(AuthService);
 
@@ -128,6 +130,15 @@ export class AnimeDetail {
       } else {
         this.isNew.set(false);
         this.cancelEdit();
+      }
+    });
+
+    effect(() => {
+      const animeName = this.anime()?.name;
+      if (animeName) {
+        this.titleService.setTitle(animeName);
+      } else {
+        this.titleService.setTitle('ogromm');
       }
     });
   }
