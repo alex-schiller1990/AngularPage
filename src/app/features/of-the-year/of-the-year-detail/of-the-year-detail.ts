@@ -64,6 +64,14 @@ export class OfTheYearDetail {
 
   protected readonly review = computed<OfTheYearReview | null>(() => this.reviewSignal()?.() ?? null);
 
+  /** True while Firestore has not yet emitted for the current route params. */
+  protected readonly loading = computed<boolean>(() => {
+    const t = this.type();
+    const y = this.year();
+    if (this.isNew() || !t || !y) return false;
+    return !this.ofTheYearService.isReviewLoaded(t, y)();
+  });
+
   // ── Edit mode ──────────────────────────────────────────────────────────────
 
   protected readonly editing = signal(false);

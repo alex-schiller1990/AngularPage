@@ -7,6 +7,7 @@ import { OfTheYearService } from '../of-the-year.service';
   selector: 'app-year-review-grid',
   imports: [RouterLink],
   templateUrl: './year-review-grid.html',
+  styleUrl: './year-review-grid.css',
   standalone: true
 })
 export class YearReviewGrid {
@@ -24,6 +25,9 @@ export class YearReviewGrid {
   );
   protected readonly years = computed(() =>
     [...(this.yearIndex()?.years ?? [])].sort((a, b) => Number(b) - Number(a))
+  );
+  protected readonly loading = computed(() =>
+    !this.ofTheYearService.isYearIndexLoaded(this.indexKey())()
   );
   protected readonly editingYear = signal<string | null>(null);
   protected readonly coverUrl = signal('');
