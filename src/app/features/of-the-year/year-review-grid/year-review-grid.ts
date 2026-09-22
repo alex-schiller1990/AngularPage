@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { OfTheYearService } from '../of-the-year.service';
 
@@ -18,7 +18,6 @@ export class YearReviewGrid {
 
   protected readonly authService = inject(AuthService);
   private readonly ofTheYearService = inject(OfTheYearService);
-  private readonly router = inject(Router);
 
   protected readonly yearIndex = computed(() =>
     this.ofTheYearService.getYearIndex(this.indexKey())()
@@ -28,10 +27,6 @@ export class YearReviewGrid {
   );
   protected readonly editingYear = signal<string | null>(null);
   protected readonly coverUrl = signal('');
-
-  protected openYearReview(year: string): void {
-    this.router.navigate(['/' + this.indexKey(), year]);
-  }
 
   protected startCoverEdit(year: string): void {
     this.editingYear.set(year);
