@@ -23,16 +23,18 @@ import {
   applyDraftMutation,
   removeAdditionalDate,
   removeAlternativeTitle,
+  todayString,
   updateAdditionalDateField,
   updateAlternativeTitle,
 } from '../../../shared/detail-draft.utils';
 import { CoverUploadState } from '../../../shared/cover-upload.state';
 import { RichEditorComponent } from '../../../shared/rich-editor/rich-editor';
 import { MigrateLegacyTriviaPipe } from '../../../shared/migrate-legacy-trivia.pipe';
+import { AdditionalDatesEditorComponent } from '../../../shared/additional-dates-editor/additional-dates-editor';
 
 @Component({
   selector: 'app-anime-detail',
-  imports: [DecimalPipe, MatButtonModule, MatCardModule, RichEditorComponent, MigrateLegacyTriviaPipe],
+  imports: [DecimalPipe, MatButtonModule, MatCardModule, RichEditorComponent, MigrateLegacyTriviaPipe, AdditionalDatesEditorComponent],
   templateUrl: './anime-detail.html',
   styleUrl: './anime-detail.css',
   standalone: true
@@ -248,6 +250,8 @@ export class AnimeDetail {
   }
 
   // --- Draft field mutations ---
+
+  protected readonly todayString = todayString;
 
   protected updateDraftField<K extends keyof AnimeUpdates>(key: K, value: AnimeUpdates[K]): void {
     this.draft.update(current => (current ? { ...current, [key]: value } : current));

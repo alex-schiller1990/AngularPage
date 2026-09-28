@@ -1,5 +1,13 @@
 import { AdditionalDate } from '../core/additional-date.model';
 
+export function todayString(): string {
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2, '0');
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const yyyy = now.getFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+}
+
 /** Minimal shape required by the draft mutation helpers. */
 export interface DraftWithLists {
   alternativeTitles: string[];

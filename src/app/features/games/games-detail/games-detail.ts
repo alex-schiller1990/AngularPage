@@ -23,16 +23,18 @@ import {
   applyDraftMutation,
   removeAdditionalDate,
   removeAlternativeTitle,
+  todayString,
   updateAdditionalDateField,
   updateAlternativeTitle,
 } from '../../../shared/detail-draft.utils';
 import { CoverUploadState } from '../../../shared/cover-upload.state';
 import { RichEditorComponent } from '../../../shared/rich-editor/rich-editor';
 import { MigrateLegacyTriviaPipe } from '../../../shared/migrate-legacy-trivia.pipe';
+import { AdditionalDatesEditorComponent } from '../../../shared/additional-dates-editor/additional-dates-editor';
 
 @Component({
   selector: 'app-games-detail',
-  imports: [DecimalPipe, MatButtonModule, MatCardModule, RichEditorComponent, MigrateLegacyTriviaPipe],
+  imports: [DecimalPipe, MatButtonModule, MatCardModule, RichEditorComponent, MigrateLegacyTriviaPipe, AdditionalDatesEditorComponent],
   templateUrl: './games-detail.html',
   styleUrl: './games-detail.css',
   standalone: true
@@ -253,6 +255,8 @@ export class GamesDetail {
   }
 
   // --- Draft field mutations ---
+
+  protected readonly todayString = todayString;
 
   protected updateDraftField<K extends keyof GameUpdates>(key: K, value: GameUpdates[K]): void {
     this.draft.update(current => (current ? { ...current, [key]: value } : current));

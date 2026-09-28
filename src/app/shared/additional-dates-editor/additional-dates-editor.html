@@ -1,0 +1,63 @@
+<div class="space-y-2">
+  <div class="flex items-center justify-between gap-2">
+    <span class="text-gray-600">Additional dates</span>
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="addDate.emit()"
+      aria-label="Add additional date"
+    >
+      Add
+    </button>
+  </div>
+
+  @for (ad of additionalDates(); track $index; let i = $index) {
+    <div class="space-y-2 rounded-md border border-gray-200 p-2">
+      <input
+        type="text"
+        class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+        [placeholder]="commentPlaceholder()"
+        [value]="ad.dateComment"
+        (input)="onFieldInput(i, 'dateComment', $any($event.target).value)"
+      />
+      <div class="grid grid-cols-2 gap-2">
+        <div class="space-y-1">
+          <input
+            type="text"
+            class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+            placeholder="Start date"
+            [value]="ad.startDate"
+            (input)="onFieldInput(i, 'startDate', $any($event.target).value)"
+          />
+          <button
+            type="button"
+            class="text-xs text-blue-600 hover:text-blue-700"
+            (click)="onFieldInput(i, 'startDate', todayString())"
+          >Today</button>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="text"
+            class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+            placeholder="End date"
+            [value]="ad.endDate ?? ''"
+            (input)="onFieldInput(i, 'endDate', $any($event.target).value)"
+          />
+          <button
+            type="button"
+            class="text-xs text-blue-600 hover:text-blue-700"
+            (click)="onFieldInput(i, 'endDate', todayString())"
+          >Today</button>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="text-xs text-red-600 hover:text-red-700"
+        (click)="removeDate.emit(i)"
+        aria-label="Remove additional date"
+      >
+        Remove
+      </button>
+    </div>
+  }
+</div>
