@@ -20,7 +20,7 @@ export class MigrateLegacyTriviaPipe implements PipeTransform {
     const doc = new DOMParser().parseFromString(html, 'text/html');
 
     doc.querySelectorAll('li').forEach(li => {
-      // Collect all child nodes: expect text node(s) followed by a <ul> or <ol>
+      // Collect all child nodes: expect text node(s) or <p> node followed by a <ul> or <ol>
       const childNodes = Array.from(li.childNodes);
       const listEl = childNodes.find(
         n => n.nodeName === 'UL' || n.nodeName === 'OL'
@@ -28,8 +28,8 @@ export class MigrateLegacyTriviaPipe implements PipeTransform {
 
       if (!listEl) return;
 
-      const textNodes = childNodes.filter(n => n.nodeType === Node.TEXT_NODE);
-      const labelText = textNodes.map(n => n.textContent ?? '').join('').trim();
+      const nonListNodes = childNodes.filter(n => n !== listEl);
+      const labelText = nonListNodes.map(n => n.textContent ?? '').join('').trim();
 
       if (labelText !== 'Momente, die ich cool fand:') return;
 
