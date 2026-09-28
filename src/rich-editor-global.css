@@ -23,9 +23,15 @@
   margin: 0.5rem 0;
 }
 
-.editor-content a {
+.editor-content a,
+.rich-text a {
   color: #3b82f6;
   text-decoration: underline;
+}
+
+.editor-content a:hover,
+.rich-text a:hover {
+  color: #1d4ed8;
 }
 
 /* Spoiler block — editor representation (div-based, always visible) */
