@@ -1,8 +1,8 @@
 a {
-  color: #3b82f6;
+  color: var(--color-brand);
   text-decoration: underline;
 }
 
 a:hover {
-  color: #1d4ed8;
+  opacity: 0.8;
 }
