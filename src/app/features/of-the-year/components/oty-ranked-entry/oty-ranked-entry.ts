@@ -5,10 +5,10 @@ import { DisplayEntry } from '../../of-the-year-detail/of-the-year-detail';
 export type BadgeColor = 'red' | 'yellow' | 'green' | 'purple';
 
 const BADGE_CLASSES: Record<BadgeColor, string> = {
-  red: 'bg-red-100 text-red-800',
-  yellow: 'bg-yellow-100 text-yellow-800',
-  green: 'bg-green-100 text-green-800',
-  purple: 'bg-purple-100 text-purple-800',
+  red: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+  yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+  green: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+  purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
 };
 
 @Component({

@@ -1,9 +1,9 @@
 <div class="mb-6 flex items-center justify-between gap-4">
-  <p class="text-sm text-gray-600">{{ description() }}</p>
+  <p class="text-sm text-[var(--color-text-muted)]">{{ description() }}</p>
   @if (authService.user()) {
     <a
       [routerLink]="newRoute()"
-      class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+      class="rounded-md bg-[var(--color-brand)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--color-brand-hover)] transition-colors"
     >
       New Year Review
     </a>
@@ -14,7 +14,7 @@
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
     @for (item of [1,2,3,4]; track item) {
       <div class="mx-auto w-full max-w-[290px]">
-        <div class="overflow-hidden rounded-lg shadow">
+        <div class="overflow-hidden rounded-lg shadow border border-[var(--color-border)]">
           <div class="year-review-grid-skeleton aspect-[2/3] w-full"></div>
         </div>
       </div>
@@ -24,7 +24,7 @@
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
     @for (year of years(); track year) {
       <div class="mx-auto w-full max-w-[290px]">
-        <div class="relative overflow-hidden rounded-lg bg-white shadow">
+        <div class="relative overflow-hidden rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow">
           <a [routerLink]="['/' + indexKey(), year]" class="block w-full text-left">
             @if (yearIndex()?.covers?.[year]) {
               <img [src]="yearIndex()!.covers![year]" [alt]="year" [class]="aspectRatio() + ' w-full object-cover'" />
@@ -36,27 +36,27 @@
             </span>
           </a>
           @if (authService.user() && editingYear() !== year) {
-            <button type="button" (click)="startCoverEdit(year)" class="absolute right-2 top-2 rounded bg-white/90 px-2 py-1 text-sm" aria-label="Edit cover">
+            <button type="button" (click)="startCoverEdit(year)" class="absolute right-2 top-2 rounded bg-black/60 text-white hover:bg-black/80 px-2 py-1 text-sm transition-colors" aria-label="Edit cover">
               ✎
             </button>
           }
         </div>
         @if (authService.user() && editingYear() === year) {
-          <div class="mt-1 flex gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow" (click)="$event.stopPropagation()">
+          <div class="mt-1 flex gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-card)] p-2 shadow" (click)="$event.stopPropagation()">
             <input
               type="url"
               [value]="coverUrl()"
               (input)="coverUrl.set($any($event.target).value)"
               placeholder="Cover URL"
-              class="min-w-0 flex-1 rounded border border-gray-300 px-2 py-1 text-xs"
+              class="min-w-0 flex-1 rounded border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1 text-xs"
             />
-            <button type="button" (click)="saveCover(year)" class="text-xs text-indigo-600">Save</button>
-            <button type="button" (click)="cancelCoverEdit()" class="text-xs text-gray-500">Cancel</button>
+            <button type="button" (click)="saveCover(year)" class="text-xs text-[var(--color-brand)] font-medium">Save</button>
+            <button type="button" (click)="cancelCoverEdit()" class="text-xs text-[var(--color-text-muted)]">Cancel</button>
           </div>
         }
       </div>
     } @empty {
-      <p class="text-sm text-gray-600">No year reviews available.</p>
+      <p class="text-sm text-[var(--color-text-muted)]">No year reviews available.</p>
     }
   </div>
 }

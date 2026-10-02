@@ -1,0 +1,6 @@
+.brand-headline {
+  background: linear-gradient(135deg, var(--color-brand) 0%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

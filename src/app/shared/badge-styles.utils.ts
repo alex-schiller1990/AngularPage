@@ -6,56 +6,56 @@ export function getStatusBadgeClasses(status: string): string {
   const normalizedStatus = normalizeBadgeValue(status);
 
   if (normalizedStatus === 'completed') {
-    return 'bg-blue-100 text-blue-700';
+    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';
   }
 
   if (normalizedStatus === 'watching' || normalizedStatus === 'playing') {
-    return 'bg-green-100 text-green-700';
+    return 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300';
   }
 
   if (normalizedStatus === 'played' || normalizedStatus === 'on-hold') {
-    return 'bg-orange-100 text-orange-700';
+    return 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300';
   }
 
   if (normalizedStatus === 'dropped') {
-    return 'bg-red-100 text-red-700';
+    return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300';
   }
 
-  return 'bg-gray-100 text-gray-700';
+  return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
 }
 
 export function getRatingBadgeClasses(rating: string | null | undefined): string {
   if (typeof rating !== 'string') {
-    return 'bg-gray-100 text-gray-600';
+    return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
   }
 
   const normalizedRatingText = rating.trim();
   const normalizedRating = Number(normalizedRatingText);
   if (!normalizedRatingText || Number.isNaN(normalizedRating)) {
-    return 'bg-gray-100 text-gray-600';
+    return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
   }
 
   if (normalizedRating === 10) {
-    return 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 text-amber-900 ring-2 ring-amber-300 shadow-sm';
+    return 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 text-amber-900 ring-2 ring-amber-300 shadow-sm dark:from-amber-600 dark:via-yellow-500 dark:to-amber-600 dark:text-white dark:ring-amber-500';
   }
 
   if (normalizedRating >= 9) {
-    return 'bg-yellow-100 text-yellow-700';
+    return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300';
   }
 
   if (normalizedRating >= 8) {
-    return 'bg-blue-100 text-blue-700';
+    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';
   }
 
   if (normalizedRating >= 7) {
-    return 'bg-green-100 text-green-700';
+    return 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300';
   }
 
   if (normalizedRating >= 6) {
-    return 'bg-orange-100 text-orange-700';
+    return 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300';
   }
 
-  return 'bg-red-100 text-red-700';
+  return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300';
 }
 
 export function isPerfectRating(rating: string | null | undefined): boolean {

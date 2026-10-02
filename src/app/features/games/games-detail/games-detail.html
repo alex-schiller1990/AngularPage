@@ -7,12 +7,12 @@
         @if (editing()) {
           <div class="mt-4 space-y-3">
             <label class="block space-y-1 text-sm">
-              <span class="text-gray-600">Cover image</span>
+              <span class="text-[var(--color-text-muted)]">Cover image</span>
               <input
                 id="cover-upload-input"
                 type="file"
                 accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.avif,.bmp,.svg"
-                class="block w-full text-sm"
+                class="block w-full text-sm text-[var(--color-text-primary)]"
                 (change)="onCoverFileSelected($event)"
               />
             </label>
@@ -30,7 +30,7 @@
               }
             </button>
             @if (selectedCoverFileName()) {
-              <p class="m-0 text-sm text-gray-600">Selected: {{ selectedCoverFileName() }}</p>
+              <p class="m-0 text-sm text-[var(--color-text-muted)]">Selected: {{ selectedCoverFileName() }}</p>
             }
             @if (uploadError()) {
               <p class="m-0 text-sm text-red-600">{{ uploadError() }}</p>
@@ -42,9 +42,9 @@
           @if (editing() && draft(); as d) {
             <div class="space-y-3 text-sm">
               <label class="block space-y-1">
-                <span class="text-gray-600">Status</span>
+                <span class="text-[var(--color-text-muted)]">Status</span>
                 <select
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   (change)="updateDraftField('status', $any($event.target).value)"
                 >
                   @for (status of statusOptions; track status) {
@@ -56,20 +56,20 @@
               </label>
 
               <label class="block space-y-1">
-                <span class="text-gray-600">Progress</span>
+                <span class="text-[var(--color-text-muted)]">Progress</span>
                 <input
                   type="text"
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   [value]="d.progress"
                   (input)="updateDraftField('progress', $any($event.target).value)"
                 />
               </label>
 
               <label class="block space-y-1">
-                <span class="text-gray-600">Rating</span>
+                <span class="text-[var(--color-text-muted)]">Rating</span>
                 <input
                   type="text"
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   placeholder="1-10 or empty"
                   [value]="d.rating"
                   (input)="updateDraftField('rating', $any($event.target).value)"
@@ -77,43 +77,43 @@
               </label>
 
               <label class="block space-y-1">
-                <span class="text-gray-600">Platform</span>
+                <span class="text-[var(--color-text-muted)]">Platform</span>
                 <input
                   type="text"
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   [value]="d.platform"
                   (input)="updateDraftField('platform', $any($event.target).value)"
                 />
               </label>
 
               <div class="space-y-1">
-                <span class="text-gray-600">Played</span>
+                <span class="text-[var(--color-text-muted)]">Played</span>
                 <div class="grid grid-cols-2 gap-2">
                   <div class="space-y-1">
                     <input
                       type="text"
-                      class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                      class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                       placeholder="Start date"
                       [value]="d.startDate"
                       (input)="updateDraftField('startDate', $any($event.target).value)"
                     />
                     <button
                       type="button"
-                      class="text-xs text-blue-600 hover:text-blue-700"
+                      class="text-xs text-[var(--color-brand)] hover:opacity-80"
                       (click)="updateDraftField('startDate', todayString())"
                     >Today</button>
                   </div>
                   <div class="space-y-1">
                     <input
                       type="text"
-                      class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                      class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                       placeholder="End date"
                       [value]="d.endDate"
                       (input)="updateDraftField('endDate', $any($event.target).value)"
                     />
                     <button
                       type="button"
-                      class="text-xs text-blue-600 hover:text-blue-700"
+                      class="text-xs text-[var(--color-brand)] hover:opacity-80"
                       (click)="updateDraftField('endDate', todayString())"
                     >Today</button>
                   </div>
@@ -129,10 +129,10 @@
               />
 
               <label class="block space-y-1">
-                <span class="text-gray-600">OpenCritic ID</span>
+                <span class="text-[var(--color-text-muted)]">OpenCritic ID</span>
                 <input
                   type="text"
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   placeholder="OpenCritic game ID"
                   [value]="d.openCriticID"
                   (input)="updateDraftField('openCriticID', $any($event.target).value)"
@@ -140,10 +140,10 @@
               </label>
 
               <label class="block space-y-1">
-                <span class="text-gray-600">OpenCritic URL</span>
+                <span class="text-[var(--color-text-muted)]">OpenCritic URL</span>
                 <input
                   type="text"
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   placeholder="https://opencritic.com/…"
                   [value]="d.openCriticURL"
                   (input)="updateDraftField('openCriticURL', $any($event.target).value)"
@@ -184,12 +184,12 @@
             </p>
 
             <p class="m-0 flex items-center justify-between gap-3 text-sm">
-              <span class="text-gray-600">Platform:</span>
+              <span class="text-[var(--color-text-muted)]">Platform:</span>
               <span>{{ g.platform }}</span>
             </p>
 
             <p class="m-0 flex items-center justify-between gap-3 text-sm">
-              <span class="text-gray-600">Played:</span>
+              <span class="text-[var(--color-text-muted)]">Played:</span>
               <span>{{ g.startDate }}{{ g.endDate ? ' – ' + g.endDate : '' }}</span>
             </p>
 
@@ -197,7 +197,7 @@
               <div class="space-y-1 pt-1 text-sm">
                 @for (ad of g.additionalDates; track $index) {
                   <p class="m-0 flex items-center justify-between gap-3">
-                    <span class="text-gray-600">{{ ad.dateComment }}</span>
+                    <span class="text-[var(--color-text-muted)]">{{ ad.dateComment }}</span>
                     <span>{{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
                   </p>
                 }
@@ -205,7 +205,7 @@
             }
 
             @if (g.details.openCriticID) {
-              <div class="mt-6 space-y-2 border-t border-gray-200 pt-4 text-sm">
+              <div class="mt-6 space-y-2 border-t border-[var(--color-border)] pt-4 text-sm">
                 <p class="m-0 mb-2 font-semibold">
                   @if (g.details.openCriticURL) {
                     <a [href]="g.details.openCriticURL" target="_blank" rel="noopener noreferrer">OpenCritic</a>
@@ -216,54 +216,54 @@
                 </p>
 
                 @if (openCriticLoading()) {
-                  <p class="m-0 text-gray-500">Loading OpenCritic data…</p>
+                  <p class="m-0 text-[var(--color-text-muted)]">Loading OpenCritic data…</p>
                 } @else if (openCriticError(); as err) {
                   <p class="m-0 text-red-600">{{ err }}</p>
                 } @else if (openCritic(); as oc) {
                   @if (oc.topCriticScore !== null) {
                     <p class="m-0">
-                      <span class="text-gray-600">Top critic score:</span>
+                      <span class="text-[var(--color-text-muted)]">Top critic score:</span>
                       {{ oc.topCriticScore }}
-                      <span class="text-gray-500">({{ oc.numReviews | number }} reviews)</span>
+                      <span class="text-[var(--color-text-muted)]">({{ oc.numReviews | number }} reviews)</span>
                     </p>
                   } @else if (oc.numReviews) {
                     <p class="m-0">
-                      <span class="text-gray-600">Reviews:</span>
+                      <span class="text-[var(--color-text-muted)]">Reviews:</span>
                       {{ oc.numReviews | number }}
                     </p>
                   }
 
                   @if (oc.firstReleaseDate) {
                     <p class="m-0">
-                      <span class="text-gray-600">Released:</span>
+                      <span class="text-[var(--color-text-muted)]">Released:</span>
                       {{ oc.firstReleaseDate }}
                     </p>
                   }
 
                   @if (oc.platforms.length) {
                     <p class="m-0">
-                      <span class="text-gray-600">Platforms:</span>
+                      <span class="text-[var(--color-text-muted)]">Platforms:</span>
                       {{ oc.platforms.join(', ') }}
                     </p>
                   }
 
                   @if (oc.genres.length) {
                     <p class="m-0">
-                      <span class="text-gray-600">Genres:</span>
+                      <span class="text-[var(--color-text-muted)]">Genres:</span>
                       {{ oc.genres.join(', ') }}
                     </p>
                   }
 
                   @if (oc.developer) {
                     <p class="m-0">
-                      <span class="text-gray-600">Developer:</span>
+                      <span class="text-[var(--color-text-muted)]">Developer:</span>
                       {{ oc.developer }}
                     </p>
                   }
 
                   @if (oc.publisher) {
                     <p class="m-0">
-                      <span class="text-gray-600">Publisher:</span>
+                      <span class="text-[var(--color-text-muted)]">Publisher:</span>
                       {{ oc.publisher }}
                     </p>
                   }
@@ -278,10 +278,10 @@
         <div class="mb-2 flex flex-wrap items-start justify-between gap-3">
           @if (isNew() && editing()) {
             <label class="block w-full space-y-1 text-sm">
-              <span class="text-gray-600">Name</span>
+              <span class="text-[var(--color-text-muted)]">Name</span>
               <input
                 type="text"
-                class="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xl font-bold"
+                class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5 text-xl font-bold"
                 placeholder="Game name"
                 [value]="newName()"
                 (input)="newName.set($any($event.target).value)"
@@ -294,7 +294,7 @@
           @if (editing() && draft(); as d) {
             <div class="mt-1 w-full space-y-2">
               <div class="flex items-center justify-between gap-2 text-sm">
-                <span class="text-gray-600">Alternative titles</span>
+                <span class="text-[var(--color-text-muted)]">Alternative titles</span>
                 <button
                   mat-stroked-button
                   type="button"
@@ -308,7 +308,7 @@
                 <div class="flex items-center gap-2">
                   <input
                     type="text"
-                    class="flex-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+                    class="flex-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5 text-sm"
                     placeholder="Alternative title"
                     [value]="title"
                     (input)="updateAlternativeTitle(i, $any($event.target).value)"
@@ -372,16 +372,16 @@
 
         @if (editing() && draft(); as d) {
           <label class="mb-2 flex items-center gap-2 text-sm">
-            <span class="text-gray-500 shrink-0">Released:</span>
+            <span class="text-[var(--color-text-muted)] shrink-0">Released:</span>
             <input
               type="text"
-              class="rounded-md border border-gray-300 px-2 py-1 text-sm"
+              class="rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1 text-sm"
               [value]="d.releaseYear"
               (input)="updateDraftField('releaseYear', $any($event.target).value)"
             />
           </label>
         } @else {
-          <p class="text-gray-500 mb-2">Released: {{ g.releaseYear }}</p>
+          <p class="text-[var(--color-text-muted)] mb-2">Released: {{ g.releaseYear }}</p>
         }
 
         @if (editing()) {

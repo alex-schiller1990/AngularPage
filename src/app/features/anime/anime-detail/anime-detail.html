@@ -7,12 +7,12 @@
         @if (editing()) {
           <div class="mt-4 space-y-3">
             <label class="block space-y-1 text-sm">
-              <span class="text-gray-600">Cover image</span>
+              <span class="text-[var(--color-text-muted)]">Cover image</span>
               <input
                 id="cover-upload-input"
                 type="file"
                 accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.avif,.bmp,.svg"
-                class="block w-full text-sm"
+                class="block w-full text-sm text-[var(--color-text-primary)]"
                 (change)="onCoverFileSelected($event)"
               />
             </label>
@@ -30,7 +30,7 @@
               }
             </button>
             @if (selectedCoverFileName()) {
-              <p class="m-0 text-sm text-gray-600">Selected: {{ selectedCoverFileName() }}</p>
+              <p class="m-0 text-sm text-[var(--color-text-muted)]">Selected: {{ selectedCoverFileName() }}</p>
             }
             @if (uploadError()) {
               <p class="m-0 text-sm text-red-600">{{ uploadError() }}</p>
@@ -42,9 +42,9 @@
           @if (editing() && draft(); as d) {
             <div class="space-y-3 text-sm">
               <label class="block space-y-1">
-                <span class="text-gray-600">Status</span>
+                <span class="text-[var(--color-text-muted)]">Status</span>
                 <select
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   (change)="updateDraftField('status', $any($event.target).value)"
                 >
                   @for (status of statusOptions; track status) {
@@ -56,20 +56,20 @@
               </label>
 
               <label class="block space-y-1">
-                <span class="text-gray-600">Progress</span>
+                <span class="text-[var(--color-text-muted)]">Progress</span>
                 <input
                   type="text"
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   [value]="d.progress"
                   (input)="updateDraftField('progress', $any($event.target).value)"
                 />
               </label>
 
               <label class="block space-y-1">
-                <span class="text-gray-600">Rating</span>
+                <span class="text-[var(--color-text-muted)]">Rating</span>
                 <input
                   type="text"
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   placeholder="1-10 or empty"
                   [value]="d.rating"
                   (input)="updateDraftField('rating', $any($event.target).value)"
@@ -77,33 +77,33 @@
               </label>
 
               <div class="space-y-1">
-                <span class="text-gray-600">Watched</span>
+                <span class="text-[var(--color-text-muted)]">Watched</span>
                 <div class="grid grid-cols-2 gap-2">
                   <div class="space-y-1">
                     <input
                       type="text"
-                      class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                      class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                       placeholder="Start date"
                       [value]="d.startDate"
                       (input)="updateDraftField('startDate', $any($event.target).value)"
                     />
                     <button
                       type="button"
-                      class="text-xs text-blue-600 hover:text-blue-700"
+                      class="text-xs text-[var(--color-brand)] hover:opacity-80"
                       (click)="updateDraftField('startDate', todayString())"
                     >Today</button>
                   </div>
                   <div class="space-y-1">
                     <input
                       type="text"
-                      class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                      class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                       placeholder="End date"
                       [value]="d.endDate"
                       (input)="updateDraftField('endDate', $any($event.target).value)"
                     />
                     <button
                       type="button"
-                      class="text-xs text-blue-600 hover:text-blue-700"
+                      class="text-xs text-[var(--color-brand)] hover:opacity-80"
                       (click)="updateDraftField('endDate', todayString())"
                     >Today</button>
                   </div>
@@ -119,10 +119,10 @@
               />
 
               <label class="block space-y-1">
-                <span class="text-gray-600">MAL ID</span>
+                <span class="text-[var(--color-text-muted)]">MAL ID</span>
                 <input
                   type="text"
-                  class="w-full rounded-md border border-gray-300 px-2 py-1.5"
+                  class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5"
                   placeholder="MyAnimeList ID"
                   [value]="d.malID"
                   (input)="updateDraftField('malID', $any($event.target).value)"
@@ -159,7 +159,7 @@
             </p>
 
             <p class="m-0 flex items-center justify-between gap-3 text-sm">
-              <span class="text-gray-600">Watched:</span>
+              <span class="text-[var(--color-text-muted)]">Watched:</span>
               <span>{{ a.startDate }}{{ a.endDate ? ' – ' + a.endDate : '' }}</span>
             </p>
 
@@ -167,7 +167,7 @@
               <div class="space-y-1 pt-1 text-sm">
                 @for (ad of a.additionalDates; track $index) {
                   <p class="m-0 flex items-center justify-between gap-3">
-                    <span class="text-gray-600">{{ ad.dateComment }}</span>
+                    <span class="text-[var(--color-text-muted)]">{{ ad.dateComment }}</span>
                     <span>{{ ad.startDate }}{{ ad.endDate ? ' – ' + ad.endDate : '' }}</span>
                   </p>
                 }
@@ -175,7 +175,7 @@
             }
 
             @if (a.details.malID) {
-              <div class="mt-6 space-y-2 border-t border-gray-200 pt-4 text-sm">
+              <div class="mt-6 space-y-2 border-t border-[var(--color-border)] pt-4 text-sm">
                 <p class="m-0 mb-2 font-semibold">
                   @if (jikanAnime(); as mal) {
                     <a [href]="mal.malUrl" target="_blank" rel="noopener noreferrer">MyAnimeList</a>
@@ -186,72 +186,72 @@
                 </p>
 
                 @if (jikanLoading()) {
-                  <p class="m-0 text-gray-500">Loading MAL data…</p>
+                  <p class="m-0 text-[var(--color-text-muted)]">Loading MAL data…</p>
                 } @else if (jikanError(); as err) {
                   <p class="m-0 text-red-600">{{ err }}</p>
                 } @else if (jikanAnime(); as mal) {
                   @if (mal.synonyms) {
                     <p class="m-0">
-                      <span class="text-gray-600">Synonyms:</span>
+                      <span class="text-[var(--color-text-muted)]">Synonyms:</span>
                       {{ mal.synonyms }}
                     </p>
                   }
 
                   @if (mal.score !== null) {
                     <p class="m-0">
-                      <span class="text-gray-600">Score:</span>
+                      <span class="text-[var(--color-text-muted)]">Score:</span>
                       {{ mal.score }}
                       @if (mal.scoredBy !== null) {
-                        <span class="text-gray-500">({{ mal.scoredBy | number }} users)</span>
+                        <span class="text-[var(--color-text-muted)]">({{ mal.scoredBy | number }} users)</span>
                       }
                     </p>
                   }
 
                   @if (mal.rank !== null) {
                     <p class="m-0">
-                      <span class="text-gray-600">Rank:</span>
+                      <span class="text-[var(--color-text-muted)]">Rank:</span>
                       #{{ mal.rank | number }}
                     </p>
                   }
 
                   @if (mal.popularity !== null) {
                     <p class="m-0">
-                      <span class="text-gray-600">Popularity:</span>
+                      <span class="text-[var(--color-text-muted)]">Popularity:</span>
                       #{{ mal.popularity | number }}
                     </p>
                   }
 
                   @if (mal.airedFrom || mal.airedTo) {
                     <p class="m-0">
-                      <span class="text-gray-600">Aired:</span>
+                      <span class="text-[var(--color-text-muted)]">Aired:</span>
                       {{ mal.airedFrom ?? '?' }}{{ mal.airedTo ? ' – ' + mal.airedTo : '' }}
                     </p>
                   }
 
                   @if (mal.duration) {
                     <p class="m-0">
-                      <span class="text-gray-600">Duration:</span>
+                      <span class="text-[var(--color-text-muted)]">Duration:</span>
                       {{ mal.duration }}
                     </p>
                   }
 
                   @if (mal.source) {
                     <p class="m-0">
-                      <span class="text-gray-600">Source:</span>
+                      <span class="text-[var(--color-text-muted)]">Source:</span>
                       {{ mal.source }}
                     </p>
                   }
 
                   @if (mal.genres.length) {
                     <p class="m-0">
-                      <span class="text-gray-600">Genres:</span>
+                      <span class="text-[var(--color-text-muted)]">Genres:</span>
                       {{ mal.genres.join(', ') }}
                     </p>
                   }
 
                   @if (mal.studios.length) {
                     <p class="m-0">
-                      <span class="text-gray-600">Studios:</span>
+                      <span class="text-[var(--color-text-muted)]">Studios:</span>
                       {{ mal.studios.join(', ') }}
                     </p>
                   }
@@ -267,7 +267,7 @@
           @if (isNew()) {
             <input
               type="text"
-              class="text-2xl font-bold rounded-md border border-gray-300 px-2 py-1"
+              class="text-2xl font-bold rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1"
               placeholder="Anime name"
               [value]="newName()"
               (input)="newName.set($any($event.target).value)"
@@ -279,7 +279,7 @@
           @if (editing() && draft(); as d) {
             <div class="mt-1 w-full space-y-2">
               <div class="flex items-center justify-between gap-2 text-sm">
-                <span class="text-gray-600">Alternative titles</span>
+                <span class="text-[var(--color-text-muted)]">Alternative titles</span>
                 <button
                   mat-stroked-button
                   type="button"
@@ -293,7 +293,7 @@
                 <div class="flex items-center gap-2">
                   <input
                     type="text"
-                    class="flex-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+                    class="flex-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1.5 text-sm"
                     placeholder="Alternative title"
                     [value]="title"
                     (input)="updateAlternativeTitle(i, $any($event.target).value)"
@@ -355,16 +355,16 @@
         </div>
         @if (editing() && draft(); as d) {
           <label class="mb-2 flex items-center gap-2 text-sm">
-            <span class="text-gray-500 shrink-0">Released:</span>
+            <span class="text-[var(--color-text-muted)] shrink-0">Released:</span>
             <input
               type="text"
-              class="rounded-md border border-gray-300 px-2 py-1 text-sm"
+              class="rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1 text-sm"
               [value]="d.releaseYear"
               (input)="updateDraftField('releaseYear', $any($event.target).value)"
             />
           </label>
         } @else {
-          <p class="text-gray-500 mb-2">Released: {{ a.releaseYear }}</p>
+          <p class="text-[var(--color-text-muted)] mb-2">Released: {{ a.releaseYear }}</p>
         }
 
         @if (editing()) {

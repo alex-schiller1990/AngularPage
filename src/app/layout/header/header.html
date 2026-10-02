@@ -1,51 +1,57 @@
-<mat-toolbar class="flex items-center justify-between px-6">
+<mat-toolbar class="flex items-center justify-between px-6 bg-[var(--color-surface-base)] border-b border-[var(--color-border)]">
   <div class="flex items-center gap-6">
     <span
-      class="text-xl font-semibold cursor-pointer"
+      class="text-xl text-[var(--color-brand)] font-bold cursor-pointer"
       routerLink="/"
     >
       Ogromm
     </span>
 
     <nav class="flex gap-4" aria-label="Main navigation">
-      <a mat-button routerLink="/" routerLinkActive="font-bold" [routerLinkActiveOptions]="{ exact: true }">
+      <a mat-button routerLink="/" routerLinkActive="text-[var(--color-brand)] font-semibold" [routerLinkActiveOptions]="{ exact: true }">
         Home
       </a>
-      <a mat-button routerLink="/anime" routerLinkActive="font-bold">
+      <a mat-button routerLink="/anime" routerLinkActive="text-[var(--color-brand)] font-semibold">
         Anime
       </a>
-      <a mat-button routerLink="/games" routerLinkActive="font-bold">
+      <a mat-button routerLink="/games" routerLinkActive="text-[var(--color-brand)] font-semibold">
         Games
       </a>
     </nav>
   </div>
 
-  @if (auth.user(); as user) {
-    <button mat-button [matMenuTriggerFor]="menu">
-      @if (user.photoURL) {
-        <img
-          [src]="user.photoURL"
-          class="w-8 h-8 rounded-full mr-2"
-          alt="profile"
-        />
-      } @else {
-        <div
-          class="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center text-sm"
-        >
-          {{ user.displayName?.[0] ?? 'U' }}
-        </div>
-      }
+  <div class="flex items-center gap-2">
+    <button mat-icon-button (click)="theme.toggle()" [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+      <mat-icon>{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
     </button>
 
-    <mat-menu #menu="matMenu">
-      <button mat-menu-item (click)="auth.logout()" aria-label="Logout">
-        Logout
+    @if (auth.user(); as user) {
+      <button mat-button [matMenuTriggerFor]="menu">
+        @if (user.photoURL) {
+          <img
+            [src]="user.photoURL"
+            class="w-8 h-8 rounded-full mr-2"
+            alt="profile"
+          />
+        } @else {
+          <div
+            class="w-8 h-8 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center text-sm"
+          >
+            {{ user.displayName?.[0] ?? 'U' }}
+          </div>
+        }
       </button>
-    </mat-menu>
-  } @else {
-    <button mat-raised-button color="primary"
-            (click)="auth.loginWithGoogle()">
-      Login
-    </button>
-  }
+
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="auth.logout()" aria-label="Logout">
+          Logout
+        </button>
+      </mat-menu>
+    } @else {
+      <button mat-raised-button color="primary"
+              (click)="auth.loginWithGoogle()">
+        Login
+      </button>
+    }
+  </div>
 </mat-toolbar>

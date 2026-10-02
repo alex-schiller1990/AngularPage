@@ -8,9 +8,11 @@ import { getStorage, provideStorage } from '@angular/fire/storage';
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { ThemeService } from './core/theme/theme.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    ThemeService,
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(),
     provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'top' })),

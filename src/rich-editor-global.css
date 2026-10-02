@@ -17,26 +17,27 @@
 }
 
 .editor-content blockquote {
-  border-left: 3px solid #d1d5db;
+  border-left: 3px solid var(--color-border);
   padding-left: 0.75rem;
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin: 0.5rem 0;
 }
 
 .editor-content a,
 .rich-text a {
-  color: #3b82f6;
+  color: var(--color-brand);
   text-decoration: underline;
 }
 
 .editor-content a:hover,
 .rich-text a:hover {
-  color: #1d4ed8;
+  color: var(--color-brand);
+  opacity: 0.8;
 }
 
 /* Spoiler block — editor representation (div-based, always visible) */
 .editor-content div[data-type="spoiler"] {
-  border: 1px solid #c7d2fe;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   margin: 0.5rem 0;
 }
@@ -44,23 +45,23 @@
 .editor-content div[data-type="spoiler-title"] {
   padding: 6px 10px;
   font-weight: 500;
-  background: #eef2ff;
+  background: var(--color-surface-card);
   border-radius: 6px 6px 0 0;
-  border-bottom: 1px solid #c7d2fe;
+  border-bottom: 1px solid var(--color-border);
   cursor: text;
 }
 
 .editor-content div[data-type="spoiler-title"]::before {
   content: '▼ ';
   font-size: 10px;
-  color: #6366f1;
+  color: var(--color-brand);
   pointer-events: none;
 }
 
 .editor-content div[data-type="spoiler"] > :not(div[data-type="spoiler-title"]) {
   padding: 6px 12px;
   min-height: 2em;
-  border-left: 2px solid #c7d2fe;
+  border-left: 2px solid var(--color-border);
   margin: 0;
 }
 
@@ -73,7 +74,7 @@
 }
 
 .rich-text details {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   margin: 0.5rem 0;
 }
@@ -83,7 +84,7 @@
   cursor: pointer;
   font-weight: 500;
   user-select: none;
-  background: #f9fafb;
+  background: var(--color-surface-card);
   border-radius: 6px 6px 0 0;
   list-style: none;
   display: flex;

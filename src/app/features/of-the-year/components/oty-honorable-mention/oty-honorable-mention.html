@@ -1,4 +1,4 @@
-<div class="flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-gray-50 border border-gray-200">
+<div class="flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)]">
   @if (entry().cover) {
     <div class="w-full sm:w-24 shrink-0">
       <img
@@ -10,9 +10,9 @@
     </div>
   }
   <div class="flex-1 min-w-0">
-    <h5 class="text-base font-semibold text-gray-900">
+    <h5 class="text-base font-semibold text-[var(--color-text-primary)]">
       @if (entry().url) {
-        <a [href]="entry().url" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+        <a [href]="entry().url" target="_blank" rel="noopener noreferrer" class="text-[var(--color-brand)] hover:underline">
           {{ entry().name }}
         </a>
       } @else {
@@ -20,7 +20,7 @@
       }
     </h5>
     @if (entry().description) {
-      <div class="rich-text text-gray-700 mt-1" [innerHTML]="entry().description"></div>
+      <div class="rich-text mt-1" [innerHTML]="entry().description"></div>
     }
   </div>
 </div>
