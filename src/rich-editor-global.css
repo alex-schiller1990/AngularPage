@@ -4,6 +4,10 @@
 
 /* ── Editor content area ─────────────────────────────────────────────────── */
 
+.editor-content {
+  color: #000;
+}
+
 .editor-content .tiptap {
   outline: none;
   min-height: 100px;
