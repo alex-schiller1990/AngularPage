@@ -28,17 +28,33 @@ html.dark {
   --bg-main: linear-gradient(135deg, #0f0f13 0%, #130d1f 50%, #0f0f13 100%);
 }
 
-/* ── Glassmorphism mat-card — dark mode ─────────────────────────────────── */
+/* ── Glassmorphism mat-card ─────────────────────────────────────────────── */
 /*
- * Override Material's opaque card surface in dark mode with a frosted-glass
- * treatment. backdrop-filter lets the violet orb light bleed through the card,
- * embedding it in the background rather than sitting on top of it.
+ * Override Material's opaque card surface with a frosted-glass treatment.
+ * backdrop-filter lets the background gradient and atmosphere layer bleed
+ * through the card, embedding it in the page rather than sitting on top.
  */
+mat-card,
+.mat-mdc-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Light mode — white-lavender frosted glass */
+html:not(.dark) mat-card,
+html:not(.dark) .mat-mdc-card {
+  background: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(124, 58, 237, 0.1) !important;
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.06),
+    0 4px 24px rgba(124, 58, 237, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Dark mode — deep violet frosted glass */
 html.dark mat-card,
 html.dark .mat-mdc-card {
   background: rgba(20, 18, 32, 0.55) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(167, 139, 250, 0.12) !important;
   box-shadow:
     0 0 0 1px rgba(167, 139, 250, 0.08),
