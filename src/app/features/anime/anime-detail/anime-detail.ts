@@ -81,6 +81,9 @@ export class AnimeDetail {
   /** Flattened anime with details for the current route id. */
   protected readonly anime = computed(() => this.animeSignal()?.() ?? null);
 
+  /** True while waiting for Firestore to return data for an existing route. */
+  protected readonly loading = computed(() => !this.isNew() && this.anime() === null);
+
   /**
    * Returns the real anime when loaded, or an empty shell in new mode so the
    * full detail template can render without a separate `@if` block.

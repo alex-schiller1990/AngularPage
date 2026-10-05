@@ -81,6 +81,9 @@ export class GamesDetail {
   /** Flattened game with details for the current route id. */
   protected readonly game = computed(() => this.gameSignal()?.() ?? null);
 
+  /** True while waiting for Firestore to return data for an existing route. */
+  protected readonly loading = computed(() => !this.isNew() && this.game() === null);
+
   /**
    * Returns the real game when loaded, or an empty shell in new mode so the
    * full detail template can render without a separate `@if` block.
