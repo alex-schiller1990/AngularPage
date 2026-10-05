@@ -4,10 +4,11 @@
       <button
         type="button"
         (click)="onRemoveChip(chip)"
-        class="rounded-full border border-violet-200 bg-violet-100 px-3 py-1 text-xs text-violet-700 hover:bg-violet-200 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300 dark:hover:bg-violet-900/50"
+        class="badge badge-rating badge-rating--good"
         [attr.aria-label]="'Remove filter ' + chip.label"
       >
-        {{ chip.label }} x
+        {{ chip.label }}
+        <span aria-hidden="true">×</span>
       </button>
     }
   </div>

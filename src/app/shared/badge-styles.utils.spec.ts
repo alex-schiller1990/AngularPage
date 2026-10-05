@@ -7,88 +7,86 @@ import {
 } from './badge-styles.utils';
 
 describe('getStatusBadgeClasses', () => {
-  it('returns blue classes for "completed"', () => {
-    expect(getStatusBadgeClasses('completed')).toBe('bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300');
+  it('returns completed badge classes for "completed"', () => {
+    expect(getStatusBadgeClasses('completed')).toBe('badge badge-status badge-status--completed');
   });
 
-  it('returns green classes for "watching"', () => {
-    expect(getStatusBadgeClasses('watching')).toBe('bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300');
+  it('returns watching badge classes for "watching"', () => {
+    expect(getStatusBadgeClasses('watching')).toBe('badge badge-status badge-status--watching');
   });
 
-  it('returns green classes for "playing"', () => {
-    expect(getStatusBadgeClasses('playing')).toBe('bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300');
+  it('returns watching badge classes for "playing"', () => {
+    expect(getStatusBadgeClasses('playing')).toBe('badge badge-status badge-status--watching');
   });
 
-  it('returns orange classes for "played"', () => {
-    expect(getStatusBadgeClasses('played')).toBe('bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300');
+  it('returns on-hold badge classes for "played"', () => {
+    expect(getStatusBadgeClasses('played')).toBe('badge badge-status badge-status--on-hold');
   });
 
-  it('returns orange classes for "on-hold"', () => {
-    expect(getStatusBadgeClasses('on-hold')).toBe('bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300');
+  it('returns on-hold badge classes for "on-hold"', () => {
+    expect(getStatusBadgeClasses('on-hold')).toBe('badge badge-status badge-status--on-hold');
   });
 
-  it('returns red classes for "dropped"', () => {
-    expect(getStatusBadgeClasses('dropped')).toBe('bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300');
+  it('returns dropped badge classes for "dropped"', () => {
+    expect(getStatusBadgeClasses('dropped')).toBe('badge badge-status badge-status--dropped');
   });
 
-  it('returns gray classes for an unknown status', () => {
-    expect(getStatusBadgeClasses('unknown-status')).toBe('bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300');
+  it('returns default badge classes for an unknown status', () => {
+    expect(getStatusBadgeClasses('unknown-status')).toBe('badge badge-status badge-status--default');
   });
 
-  it('returns gray classes for an empty string', () => {
-    expect(getStatusBadgeClasses('')).toBe('bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300');
+  it('returns default badge classes for an empty string', () => {
+    expect(getStatusBadgeClasses('')).toBe('badge badge-status badge-status--default');
   });
 
-  it('normalizes underscore separators (e.g. "on_hold" → orange)', () => {
-    expect(getStatusBadgeClasses('on_hold')).toBe('bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300');
+  it('normalizes underscore separators (e.g. "on_hold" → on-hold badge)', () => {
+    expect(getStatusBadgeClasses('on_hold')).toBe('badge badge-status badge-status--on-hold');
   });
 });
 
 describe('getRatingBadgeClasses', () => {
-  it('returns gradient classes for rating 10', () => {
-    const result = getRatingBadgeClasses('10');
-    expect(result).toContain('bg-gradient-to-r');
-    expect(result).toContain('amber');
+  it('returns perfect badge classes for rating 10', () => {
+    expect(getRatingBadgeClasses('10')).toBe('badge badge-rating badge-rating--perfect');
   });
 
-  it('returns yellow classes for rating 9', () => {
-    expect(getRatingBadgeClasses('9')).toBe('bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300');
+  it('returns high badge classes for rating 9', () => {
+    expect(getRatingBadgeClasses('9')).toBe('badge badge-rating badge-rating--high');
   });
 
-  it('returns blue classes for rating 8', () => {
-    expect(getRatingBadgeClasses('8')).toBe('bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300');
+  it('returns good badge classes for rating 8', () => {
+    expect(getRatingBadgeClasses('8')).toBe('badge badge-rating badge-rating--good');
   });
 
-  it('returns green classes for rating 7', () => {
-    expect(getRatingBadgeClasses('7')).toBe('bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300');
+  it('returns mid badge classes for rating 7', () => {
+    expect(getRatingBadgeClasses('7')).toBe('badge badge-rating badge-rating--mid');
   });
 
-  it('returns orange classes for rating 6', () => {
-    expect(getRatingBadgeClasses('6')).toBe('bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300');
+  it('returns low badge classes for rating 6', () => {
+    expect(getRatingBadgeClasses('6')).toBe('badge badge-rating badge-rating--low');
   });
 
-  it('returns red classes for rating 5', () => {
-    expect(getRatingBadgeClasses('5')).toBe('bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300');
+  it('returns poor badge classes for rating 5', () => {
+    expect(getRatingBadgeClasses('5')).toBe('badge badge-rating badge-rating--poor');
   });
 
-  it('returns red classes for rating 1', () => {
-    expect(getRatingBadgeClasses('1')).toBe('bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300');
+  it('returns poor badge classes for rating 1', () => {
+    expect(getRatingBadgeClasses('1')).toBe('badge badge-rating badge-rating--poor');
   });
 
-  it('returns gray classes for null', () => {
-    expect(getRatingBadgeClasses(null)).toBe('bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400');
+  it('returns none badge classes for null', () => {
+    expect(getRatingBadgeClasses(null)).toBe('badge badge-rating badge-rating--none');
   });
 
-  it('returns gray classes for undefined', () => {
-    expect(getRatingBadgeClasses(undefined)).toBe('bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400');
+  it('returns none badge classes for undefined', () => {
+    expect(getRatingBadgeClasses(undefined)).toBe('badge badge-rating badge-rating--none');
   });
 
-  it('returns gray classes for a non-numeric string', () => {
-    expect(getRatingBadgeClasses('abc')).toBe('bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400');
+  it('returns none badge classes for a non-numeric string', () => {
+    expect(getRatingBadgeClasses('abc')).toBe('badge badge-rating badge-rating--none');
   });
 
-  it('returns gray classes for an empty string', () => {
-    expect(getRatingBadgeClasses('')).toBe('bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400');
+  it('returns none badge classes for an empty string', () => {
+    expect(getRatingBadgeClasses('')).toBe('badge badge-rating badge-rating--none');
   });
 });
 

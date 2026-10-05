@@ -1,11 +1,12 @@
-<div class="p-6">
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-    <h1 class="text-2xl font-semibold">Anime</h1>
+<div class="p-6 container">
+
+  <div class="mb-8 flex flex-wrap items-center justify-between gap-4 animate-fade-in-up stagger-1">
+    <h1 class="text-h2 font-semibold">Anime</h1>
     <div class="flex items-center gap-2">
       @if (authService.user()) {
         <a
           routerLink="/anime/new"
-          class="rounded-md bg-[var(--color-brand)] px-3 py-2 text-sm font-medium text-white hover:opacity-90"
+          class="btn btn-primary"
         >
           Add
         </a>
@@ -14,7 +15,7 @@
         type="button"
         (click)="refreshList()"
         [disabled]="animeService.listLoading()"
-        class="rounded-md border border-[var(--color-border)] bg-[var(--color-surface-card)] px-3 py-2 text-sm text-[var(--color-text-primary)] hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+        class="btn btn-secondary"
       >
         @if (animeService.listLoading()) {
           Refreshing…
@@ -25,7 +26,7 @@
     </div>
   </div>
 
-  <div class="mb-6 flex gap-2 border-b border-[var(--color-border)]">
+  <div class="mb-6 flex gap-2 border-b border-[var(--color-border)] animate-fade-in-up stagger-2">
     <button
       type="button"
       (click)="switchTab('list')"
@@ -45,9 +46,9 @@
   </div>
 
   @if (activeTab() === 'year-review') {
-    <app-anime-year-review />
+    <app-anime-year-review class="animate-fade-in-up stagger-3" />
   } @else {
-  <div class="mb-6 space-y-2">
+  <div class="mb-6 space-y-4 animate-fade-in-up stagger-3">
     <div class="relative">
       <input
         #searchInput
@@ -55,14 +56,14 @@
         [value]="searchQuery()"
         (input)="searchQuery.set(searchInput.value)"
         placeholder="Search by name or alternative title"
-        class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-input)] px-3 py-2 pr-20 text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
+        class="input pr-20"
       />
 
       @if (searchQuery()) {
         <button
           type="button"
           (click)="searchQuery.set(''); searchInput.value = ''"
-          class="absolute right-2 top-1/2 -translate-y-1/2 rounded border border-[var(--color-border)] bg-[var(--color-surface-card)] px-2 py-1 text-xs text-[var(--color-text-primary)] hover:bg-[var(--color-surface-input)]"
+          class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost text-xs px-2 py-1"
         >
           Clear
         </button>
@@ -116,7 +117,7 @@
         <button
           type="button"
           (click)="clearAllFilters(); searchInput.value = ''"
-          class="rounded-md border border-[var(--color-border)] bg-[var(--color-surface-card)] px-3 py-2 text-sm text-[var(--color-text-primary)] hover:opacity-80"
+          class="btn btn-secondary"
         >
           Clear all
         </button>
@@ -134,13 +135,23 @@
   </div>
 
   @if (filteredAnime().length === 0) {
-    <p class="text-sm text-[var(--color-text-muted)]">No anime match your search.</p>
+    <div class="card p-12 text-center animate-fade-in-up stagger-4">
+      <div class="text-4xl mb-4" aria-hidden="true">🎌</div>
+      <h2 class="text-h3 font-semibold text-[var(--color-text-primary)] mb-2">No anime match your search</h2>
+      <p class="text-body text-[var(--color-text-muted)]">Try adjusting your filters or search term.</p>
+    </div>
   } @else {
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       @for (anime of filteredAnime(); track anime.id; let index = $index) {
         <a
           [routerLink]="['/anime', anime.title]"
-          class="mx-auto flex h-full w-full max-w-[290px] flex-col bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-lg overflow-hidden hover:ring-2 hover:ring-[var(--color-brand)] hover:shadow-lg transition"
+          class="card card-interactive flex h-full flex-col overflow-hidden animate-fade-in-up"
+          [class.stagger-1]="index % 6 === 0"
+          [class.stagger-2]="index % 6 === 1"
+          [class.stagger-3]="index % 6 === 2"
+          [class.stagger-4]="index % 6 === 3"
+          [class.stagger-5]="index % 6 === 4"
+          [class.stagger-6]="index % 6 === 5"
         >
           <img
             [src]="anime.coverURL"
@@ -150,8 +161,8 @@
             class="w-full aspect-[290/410] object-cover"
           />
 
-          <div class="flex h-full flex-col p-4 text-center">
-            <h2 class="font-semibold leading-tight">
+          <div class="flex h-full flex-col p-5 text-center">
+            <h2 class="text-body font-semibold leading-snug">
               {{ anime.name }}
             </h2>
 
@@ -159,24 +170,22 @@
               {{ anime.releaseYear }}
             </p>
 
-            <div class="mt-auto space-y-1 pt-3">
+            <div class="mt-auto space-y-2 pt-3">
               <p class="flex items-center justify-between gap-3 text-sm">
                 <span
-                  class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
                   [class]="getStatusBadgeClasses(anime.status)"
                 >
                   {{ formatStatusLabel(anime.status) }}
                 </span>
-                <span>{{ anime.progress }}</span>
+                <span class="font-mono">{{ anime.progress }}</span>
               </p>
 
-              <p class="text-sm">
+              <p class="text-sm text-[var(--color-text-muted)]">
                 {{ anime.startDate }}{{ anime.endDate ? ' – ' + anime.endDate : '' }}
               </p>
 
               <p class="text-sm">
                 <span
-                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
                   [class]="getRatingBadgeClasses(anime.rating)"
                 >
                   @if (isPerfectRating(anime.rating)) {
@@ -198,5 +207,5 @@
     </div>
   }
   }
-  
+
 </div>

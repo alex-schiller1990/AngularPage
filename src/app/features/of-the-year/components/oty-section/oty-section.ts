@@ -6,7 +6,7 @@ import { OtyEntry, OtySection } from '../../of-the-year.model';
 import { DisplayEntry } from '../../of-the-year-detail/of-the-year-detail';
 import { OtyEntryEditComponent, EntryFieldChange } from '../oty-entry-edit/oty-entry-edit';
 import { OtyHonorableMentionComponent } from '../oty-honorable-mention/oty-honorable-mention';
-import { OtyRankedEntryComponent, BadgeColor } from '../oty-ranked-entry/oty-ranked-entry';
+import { OtyRankedEntryComponent, BadgePlacement } from '../oty-ranked-entry/oty-ranked-entry';
 
 export type SectionKey = 'disappointments' | 'surprises' | 'highlights' | 'mostWanted';
 
@@ -25,12 +25,12 @@ export interface SectionMoveEvent extends SectionListEvent {
   direction: -1 | 1;
 }
 
-const SECTION_BADGE_COLOR: Record<SectionKey, BadgeColor> = {
-  disappointments: 'red',
-  surprises: 'yellow',
-  highlights: 'green',
-  mostWanted: 'purple',
-};
+function placementForSlot(slot: number): BadgePlacement {
+  if (slot === 1) return 'first';
+  if (slot === 2) return 'second';
+  if (slot === 3) return 'third';
+  return 'other';
+}
 
 @Component({
   selector: 'app-oty-section',
@@ -59,8 +59,6 @@ export class OtySectionComponent {
   readonly add = output<{ listKey: 'entry' | 'honorableMentions' }>();
   readonly remove = output<SectionListEvent>();
   readonly move = output<SectionMoveEvent>();
-
-  protected readonly badgeColor = computed(() => SECTION_BADGE_COLOR[this.sectionKey()]);
 
   protected readonly sortedEntries = computed<DisplayEntry[]>(() => {
     const entries = this.section()?.entry;
@@ -94,6 +92,10 @@ export class OtySectionComponent {
     result.sort((a, b) => b.slot - a.slot);
     return result;
   });
+
+  protected badgePlacementFor(slot: number): BadgePlacement {
+    return placementForSlot(slot);
+  }
 
   protected hmInitialDesc(i: number): string {
     return this.initialEntryDesc()[`${this.sectionKey()}:hm:${i}`] ?? '';

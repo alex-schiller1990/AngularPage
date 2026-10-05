@@ -1,10 +1,10 @@
 @if (review(); as r) {
-  <div class="mx-auto max-w-7xl px-4 py-6">
-    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+  <div class="container mx-auto max-w-7xl px-4 py-6">
+    <div class="flex flex-col gap-8 lg:flex-row lg:items-start animate-fade-in-up stagger-1">
       <!-- Sticky Sidebar Navigation (Desktop) -->
-      <aside class="w-full lg:w-64 lg:shrink-0 lg:sticky lg:top-6">
+      <aside class="w-full lg:w-64 lg:shrink-0 lg:sticky lg:top-6 animate-fade-in-up stagger-2">
         <mat-card class="p-4">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3 px-2">
+          <h2 class="text-caption mb-3 px-2">
             Navigation
           </h2>
           <nav class="flex flex-col space-y-1 text-sm font-medium">
@@ -43,20 +43,21 @@
           <!-- Action buttons -->
           <div class="mt-4 pt-4 border-t border-[var(--color-border)] flex flex-col gap-2">
             @if (editing()) {
-              <button mat-raised-button color="primary" (click)="saveEdit()" [disabled]="saving()">
+              <button mat-raised-button color="primary" (click)="saveEdit()" [disabled]="saving()" class="btn btn-primary">
                 {{ saving() ? 'Saving…' : 'Save' }}
               </button>
-              <button mat-stroked-button (click)="cancelEdit()" [disabled]="saving()">
+              <button mat-stroked-button (click)="cancelEdit()" [disabled]="saving()" class="btn btn-secondary">
                 Cancel
               </button>
             } @else {
               @if (auth.user()) {
-                <button mat-stroked-button (click)="startEdit()">Edit</button>
+                <button mat-stroked-button (click)="startEdit()" class="btn btn-secondary">Edit</button>
               }
               <a
                 mat-stroked-button
                 [routerLink]="type() === 'aoty' ? '/anime' : '/games'"
                 [queryParams]="{ tab: 'year-review' }"
+                class="btn btn-secondary"
               >
                 ← Back to {{ type() === 'aoty' ? 'Anime' : 'Games' }}
               </a>
@@ -66,37 +67,37 @@
       </aside>
 
       <!-- Main Content Area -->
-      <main class="flex-1 min-w-0 space-y-8">
+      <main class="flex-1 min-w-0 space-y-8 animate-fade-in-up stagger-3">
         <!-- Page Title Header -->
         <mat-card class="p-6">
-          <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-brand)]">
+          <span class="text-caption">
             {{ type() === 'aoty' ? 'Anime Review' : 'Game Review' }}
           </span>
-          <h1 class="text-3xl font-extrabold text-[var(--color-text-primary)] mt-1">
+          <h1 class="text-h1 font-extrabold text-[var(--color-text-primary)] mt-1">
             {{ title() }}
           </h1>
         </mat-card>
 
         <!-- New Review: Year + Cover URL inputs (only shown when isNew) -->
         @if (isNew()) {
-          <mat-card class="p-6">
-            <h2 class="text-2xl font-bold text-[var(--color-text-primary)] mb-4 pb-2 border-b border-[var(--color-border)]">
+          <mat-card class="p-6 animate-fade-in-up stagger-4">
+            <h2 class="text-h2 font-bold text-[var(--color-text-primary)] mb-4 pb-2 border-b border-[var(--color-border)]">
               New Year Review
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Year</label>
+                <label class="block text-caption mb-1">Year</label>
                 <input
-                  class="w-full border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] rounded px-3 py-2 text-sm"
+                  class="input"
                   placeholder="e.g. 2024"
                   [value]="yearInput()"
                   (input)="yearInput.set($any($event.target).value)"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Cover Image URL</label>
+                <label class="block text-caption mb-1">Cover Image URL</label>
                 <input
-                  class="w-full border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] rounded px-3 py-2 text-sm"
+                  class="input"
                   placeholder="https://…"
                   [value]="coverUrlInput()"
                   (input)="coverUrlInput.set($any($event.target).value)"
@@ -107,9 +108,9 @@
         }
 
         <!-- Intro Section -->
-        <section id="intro">
+        <section id="intro" class="animate-fade-in-up stagger-4">
           <mat-card class="p-6">
-            <h2 class="text-2xl font-bold text-[var(--color-text-primary)] mb-4 pb-2 border-b border-[var(--color-border)]">
+            <h2 class="text-h2 font-bold text-[var(--color-text-primary)] mb-4 pb-2 border-b border-[var(--color-border)]">
               Intro
             </h2>
             @if (editing() && draft()) {
@@ -126,7 +127,7 @@
         </section>
 
         <!-- Disappointments Section -->
-        <section id="disappointments">
+        <section id="disappointments" class="animate-fade-in-up stagger-5">
           <app-oty-section
             sectionKey="disappointments"
             title="Disappointments"
@@ -144,7 +145,7 @@
         </section>
 
         <!-- Surprises Section -->
-        <section id="surprises">
+        <section id="surprises" class="animate-fade-in-up stagger-6">
           <app-oty-section
             sectionKey="surprises"
             title="Surprises"
@@ -162,7 +163,7 @@
         </section>
 
         <!-- Highlights Section -->
-        <section id="highlights">
+        <section id="highlights" class="animate-fade-in-up stagger-1">
           <app-oty-section
             sectionKey="highlights"
             title="Highlights"
@@ -180,7 +181,7 @@
         </section>
 
         <!-- Most Wanted Section -->
-        <section id="mostWanted">
+        <section id="mostWanted" class="animate-fade-in-up stagger-2">
           <app-oty-section
             sectionKey="mostWanted"
             title="Most Wanted"
@@ -198,9 +199,9 @@
         </section>
 
         <!-- Outro Section -->
-        <section id="outro">
+        <section id="outro" class="animate-fade-in-up stagger-3">
           <mat-card class="p-6">
-            <h2 class="text-2xl font-bold text-[var(--color-text-primary)] mb-4 pb-2 border-b border-[var(--color-border)]">
+            <h2 class="text-h2 font-bold text-[var(--color-text-primary)] mb-4 pb-2 border-b border-[var(--color-border)]">
               Outro
             </h2>
             @if (editing() && draft()) {
@@ -220,7 +221,7 @@
   </div>
 } @else if (loading()) {
   <!-- Skeleton loading state -->
-  <div class="mx-auto max-w-7xl px-4 py-6">
+  <div class="container mx-auto max-w-7xl px-4 py-6">
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
 
       <!-- Sidebar skeleton -->
@@ -262,9 +263,9 @@
     </div>
   </div>
 } @else {
-  <mat-card class="mx-auto mt-12 max-w-lg p-8 text-center">
-    <h2 class="text-2xl font-bold text-[var(--color-text-primary)]">Review Not Found</h2>
-    <p class="mt-2 text-[var(--color-text-muted)]">
+  <mat-card class="container mx-auto mt-12 max-w-lg p-8 text-center">
+    <h2 class="text-h2 font-bold text-[var(--color-text-primary)]">Review Not Found</h2>
+    <p class="mt-2 text-body text-[var(--color-text-muted)]">
       No {{ type() === 'aoty' ? 'Anime' : 'Game' }} of the Year review was found for year {{ year() }}.
     </p>
   </mat-card>

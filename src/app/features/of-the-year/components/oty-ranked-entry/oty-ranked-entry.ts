@@ -1,14 +1,14 @@
 import { Component, input } from '@angular/core';
 import { DisplayEntry } from '../../of-the-year-detail/of-the-year-detail';
 
-// Tailwind color token for the placement badge (e.g. 'red', 'yellow', 'green', 'purple')
-export type BadgeColor = 'red' | 'yellow' | 'green' | 'purple';
+// Semantic placement badge variants
+export type BadgePlacement = 'first' | 'second' | 'third' | 'other';
 
-const BADGE_CLASSES: Record<BadgeColor, string> = {
-  red: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-  yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
-  green: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
-  purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
+const BADGE_CLASSES: Record<BadgePlacement, string> = {
+  first: 'badge badge-placement--first',
+  second: 'badge badge-placement--second',
+  third: 'badge badge-placement--third',
+  other: 'badge badge-placement--other',
 };
 
 @Component({
@@ -18,9 +18,9 @@ const BADGE_CLASSES: Record<BadgeColor, string> = {
 })
 export class OtyRankedEntryComponent {
   readonly item = input.required<DisplayEntry>();
-  readonly badgeColor = input<BadgeColor>('green');
+  readonly badgePlacement = input<BadgePlacement>('other');
 
   protected get badgeClass(): string {
-    return BADGE_CLASSES[this.badgeColor()];
+    return BADGE_CLASSES[this.badgePlacement()];
   }
 }

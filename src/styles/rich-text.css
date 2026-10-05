@@ -1,0 +1,138 @@
+/* ── Rich text content (for TipTap output) ──────────────────────────────────── */
+.rich-text {
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-primary);
+}
+
+.rich-text h1,
+.rich-text h2,
+.rich-text h3 {
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-4);
+}
+
+.rich-text h1 { font-size: var(--text-h1); }
+.rich-text h2 { font-size: var(--text-h2); }
+.rich-text h3 { font-size: var(--text-h3); }
+
+.rich-text p {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.rich-text ul,
+.rich-text ol {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding-inline-start: var(--space-6);
+}
+
+.rich-text li {
+  margin: var(--space-2) 0;
+}
+
+.rich-text a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rich-text a:hover {
+  color: var(--color-brand-hover);
+}
+
+.rich-text code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-brand-subtle);
+  color: var(--color-brand);
+  padding: 0.125em 0.375em;
+  border-radius: var(--radius-sm);
+}
+
+.rich-text pre {
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  overflow-x: auto;
+  margin: var(--space-4) 0;
+}
+
+.rich-text pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+}
+
+.rich-text blockquote {
+  border-left: 3px solid var(--color-brand);
+  padding-left: var(--space-4);
+  margin: var(--space-6) 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.rich-text hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  margin: var(--space-8) 0;
+}
+
+.rich-text img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  margin: var(--space-4) 0;
+}
+
+/* Spoiler block */
+.spoiler-block {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-card);
+}
+
+.spoiler-block summary {
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  background: var(--color-surface-card-hover);
+  border-bottom: 1px solid var(--color-border);
+  list-style: none;
+}
+
+.spoiler-block summary::-webkit-details-marker {
+  display: none;
+}
+
+.spoiler-block summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: var(--space-2);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.spoiler-block[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.spoiler-block > div {
+  padding: var(--space-4);
+}
+
+.spoiler-block > div > *:first-child {
+  margin-top: 0;
+}
+
+.spoiler-block > div > *:last-child {
+  margin-bottom: 0;
+}

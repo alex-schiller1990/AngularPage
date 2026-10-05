@@ -1,8 +1,10 @@
-a {
+/* Anime detail specific styles - global styles moved to styles.css */
+.rich-text a {
   color: var(--color-brand);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-a:hover {
-  opacity: 0.8;
+.rich-text a:hover {
+  color: var(--color-brand-hover);
 }

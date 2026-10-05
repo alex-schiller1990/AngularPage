@@ -9,7 +9,7 @@ import { YearReviewGrid } from '../../of-the-year/year-review-grid/year-review-g
       indexKey="aoty"
       newRoute="/aoty/new"
       aspectRatio="aspect-[290/410]"
-      placeholderColor="bg-indigo-200"
+      placeholderColor="placeholder-brand"
       description="Browse anime year reviews."
     />
   `,

@@ -1,4 +1,4 @@
-<mat-toolbar class="flex items-center justify-between px-6 bg-[var(--color-surface-base)] border-b border-[var(--color-border)]">
+<mat-toolbar class="flex items-center justify-between px-6 bg-[var(--color-surface-base)]/80 border-b border-[var(--color-border)] backdrop-blur-xl sticky top-0 z-[var(--z-sticky)]">
   <div class="flex items-center gap-6">
     <span
       class="text-xl text-[var(--color-brand)] font-bold cursor-pointer"
@@ -7,49 +7,48 @@
       Ogromm
     </span>
 
-    <nav class="flex gap-4" aria-label="Main navigation">
-      <a mat-button routerLink="/" routerLinkActive="text-[var(--color-brand)] font-semibold" [routerLinkActiveOptions]="{ exact: true }">
+    <nav class="flex gap-2" aria-label="Main navigation">
+      <a mat-button routerLink="/" routerLinkActive="text-[var(--color-brand)] font-semibold" [routerLinkActiveOptions]="{ exact: true }" class="text-sm font-medium transition-colors hover:text-[var(--color-brand)]">
         Home
       </a>
-      <a mat-button routerLink="/anime" routerLinkActive="text-[var(--color-brand)] font-semibold">
+      <a mat-button routerLink="/anime" routerLinkActive="text-[var(--color-brand)] font-semibold" class="text-sm font-medium transition-colors hover:text-[var(--color-brand)]">
         Anime
       </a>
-      <a mat-button routerLink="/games" routerLinkActive="text-[var(--color-brand)] font-semibold">
+      <a mat-button routerLink="/games" routerLinkActive="text-[var(--color-brand)] font-semibold" class="text-sm font-medium transition-colors hover:text-[var(--color-brand)]">
         Games
       </a>
     </nav>
   </div>
 
   <div class="flex items-center gap-2">
-    <button mat-icon-button (click)="theme.toggle()" [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+    <button mat-icon-button (click)="theme.toggle()" [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'" class="transition-colors">
       <mat-icon>{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
     </button>
 
     @if (auth.user(); as user) {
-      <button mat-button [matMenuTriggerFor]="menu">
+      <button mat-button [matMenuTriggerFor]="menu" class="flex items-center gap-2 transition-colors">
         @if (user.photoURL) {
           <img
             [src]="user.photoURL"
-            class="w-8 h-8 rounded-full mr-2"
+            class="w-8 h-8 rounded-full"
             alt="profile"
           />
         } @else {
           <div
-            class="w-8 h-8 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center text-sm"
+            class="w-8 h-8 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center text-sm font-medium"
           >
             {{ user.displayName?.[0] ?? 'U' }}
           </div>
         }
       </button>
 
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="auth.logout()" aria-label="Logout">
+      <mat-menu #menu="matMenu" class="min-w-[160px]">
+        <button mat-menu-item (click)="auth.logout()" aria-label="Logout" class="text-sm">
           Logout
         </button>
       </mat-menu>
     } @else {
-      <button mat-raised-button color="primary"
-              (click)="auth.loginWithGoogle()">
+      <button mat-raised-button color="primary" (click)="auth.loginWithGoogle()" class="btn btn-primary !px-4 !py-2">
         Login
       </button>
     }

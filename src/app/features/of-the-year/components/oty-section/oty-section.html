@@ -1,12 +1,12 @@
 <mat-card class="p-6 space-y-6">
-  <h2 class="text-2xl font-bold text-[var(--color-text-primary)] pb-2 border-b border-[var(--color-border)]">
+  <h2 class="text-h2 font-bold text-[var(--color-text-primary)] pb-2 border-b border-[var(--color-border)]">
     {{ title() }}
   </h2>
 
   @if (editing()) {
     <!-- Section Intro Editor -->
     <div>
-      <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Section Intro</label>
+      <label class="block text-caption mb-1">Section Intro</label>
       <app-rich-editor
         [value]="initialSectionIntro()"
         (valueChange)="sectionIntroChange.emit($event)"
@@ -15,7 +15,7 @@
 
     <!-- Honorable Mentions Edit -->
     <div class="space-y-4">
-      <h3 class="text-lg font-semibold text-[var(--color-text-primary)]">Honorable Mentions</h3>
+      <h3 class="text-h3 font-semibold text-[var(--color-text-primary)]">Honorable Mentions</h3>
       @for (hm of draft()?.honorableMentions ?? []; track $index; let i = $index) {
         <app-oty-entry-edit
           [entry]="hm"
@@ -28,14 +28,14 @@
           (remove)="remove.emit({ listKey: 'honorableMentions', index: i })"
         />
       }
-      <button mat-stroked-button (click)="add.emit({ listKey: 'honorableMentions' })">
+      <button type="button" (click)="add.emit({ listKey: 'honorableMentions' })" class="btn btn-secondary">
         + Add Honorable Mention
       </button>
     </div>
 
     <!-- Entries Edit -->
     <div class="space-y-4">
-      <h3 class="text-lg font-semibold text-[var(--color-text-primary)]">Entries</h3>
+      <h3 class="text-h3 font-semibold text-[var(--color-text-primary)]">Entries</h3>
       @for (entry of draft()?.entry ?? []; track $index; let i = $index) {
         <app-oty-entry-edit
           [entry]="entry"
@@ -48,7 +48,7 @@
           (remove)="remove.emit({ listKey: 'entry', index: i })"
         />
       }
-      <button mat-stroked-button (click)="add.emit({ listKey: 'entry' })">
+      <button type="button" (click)="add.emit({ listKey: 'entry' })" class="btn btn-secondary">
         + Add Entry
       </button>
     </div>
@@ -62,7 +62,7 @@
 
       @if (sec.honorableMentions && sec.honorableMentions.length > 0) {
         <div class="mb-6 pb-4 border-b border-[var(--color-border)]">
-          <h4 class="text-lg font-semibold text-[var(--color-text-primary)] mb-3">Honorable Mentions</h4>
+          <h4 class="text-h3 font-semibold text-[var(--color-text-primary)] mb-3">Honorable Mentions</h4>
           <div class="space-y-4">
             @for (hm of sec.honorableMentions; track $index) {
               <app-oty-honorable-mention [entry]="hm" />
@@ -74,7 +74,7 @@
       @if (sortedEntries().length > 0) {
         <div class="space-y-6">
           @for (item of sortedEntries(); track item.slot + '-' + item.entry.name) {
-            <app-oty-ranked-entry [item]="item" [badgeColor]="badgeColor()" />
+            <app-oty-ranked-entry [item]="item" [badgePlacement]="badgePlacementFor(item.slot)" />
           }
         </div>
       }

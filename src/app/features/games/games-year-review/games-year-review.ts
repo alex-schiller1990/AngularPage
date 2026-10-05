@@ -9,7 +9,7 @@ import { YearReviewGrid } from '../../of-the-year/year-review-grid/year-review-g
       indexKey="goty"
       newRoute="/goty/new"
       aspectRatio="aspect-[290/435]"
-      placeholderColor="bg-purple-200"
+      placeholderColor="placeholder-brand-strong"
       description="Browse game year reviews."
     />
   `,

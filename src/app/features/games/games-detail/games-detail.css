@@ -1,0 +1,10 @@
+/* Games detail specific styles - global styles moved to styles.css */
+.rich-text a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rich-text a:hover {
+  color: var(--color-brand-hover);
+}

@@ -1,3 +1,4 @@
+/* Home-specific styles only - global styles moved to styles.css */
 .brand-headline {
   background: linear-gradient(135deg, var(--color-brand) 0%, #c4b5fd 40%, #e879f9 70%, var(--color-brand) 100%);
   background-size: 300% 300%;
@@ -12,7 +13,7 @@
   50% { background-position: 100% 50%; }
 }
 
-/* ── Neon rotating card border ─────────────────────────────────────────── */
+/* Neon rotating card border */
 @property --angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -24,29 +25,18 @@
   isolation: isolate;
 }
 
-/*
- * ::before — blurred glow halo that spreads outward.
- * Sits behind the card with a generous blur so light "bleeds" outward
- * without touching neighbouring cards (kept inside the card's stacking
- * context via isolation: isolate + z-index: -2).
- */
 .neon-card::before {
   content: '';
   position: absolute;
   inset: -6px;
   border-radius: inherit;
-  background: conic-gradient(from var(--angle), #7c3aed, #4f46e5, #0d9488, #c4b5fd, #7c3aed);
+  background: conic-gradient(from var(--angle), var(--color-brand), #4f46e5, #8b5cf6, #c4b5fd, var(--color-brand));
   filter: blur(14px);
   opacity: 0.75;
   animation: neon-rotate 4s linear infinite;
   z-index: -2;
 }
 
-/*
- * ::after — solid card-colour fill that covers the interior.
- * Inset by 2px so only a 2px sliver of the glow halo is
- * visible at the edge, forming a crisp border line.
- */
 .neon-card::after {
   content: '';
   position: absolute;
@@ -65,4 +55,3 @@ html:not(.dark) .neon-card::before {
   opacity: 0.35;
   filter: blur(18px);
 }
-

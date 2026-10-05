@@ -3,7 +3,7 @@
   @if (authService.user()) {
     <a
       [routerLink]="newRoute()"
-      class="rounded-md bg-[var(--color-brand)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--color-brand-hover)] transition-colors"
+      class="btn btn-primary text-sm"
     >
       New Year Review
     </a>
@@ -15,7 +15,7 @@
     @for (item of [1,2,3,4]; track item) {
       <div class="mx-auto w-full max-w-[290px]">
         <div class="overflow-hidden rounded-lg shadow border border-[var(--color-border)]">
-          <div class="year-review-grid-skeleton aspect-[2/3] w-full"></div>
+          <div class="skeleton aspect-[2/3] w-full"></div>
         </div>
       </div>
     }
@@ -31,12 +31,12 @@
             } @else {
               <div [class]="aspectRatio() + ' w-full ' + placeholderColor()"></div>
             }
-            <span class="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-3 text-center text-xl font-semibold text-white">
+            <span class="absolute inset-x-0 bottom-0 bg-[var(--color-bg-overlay)] px-4 py-3 text-center text-xl font-semibold text-white">
               {{ year }}
             </span>
           </a>
           @if (authService.user() && editingYear() !== year) {
-            <button type="button" (click)="startCoverEdit(year)" class="absolute right-2 top-2 rounded bg-black/60 text-white hover:bg-black/80 px-2 py-1 text-sm transition-colors" aria-label="Edit cover">
+            <button type="button" (click)="startCoverEdit(year)" class="absolute right-2 top-2 rounded bg-[var(--color-bg-overlay)] text-white hover:bg-[var(--color-bg-overlay-hover)] px-2 py-1 text-sm transition-colors" aria-label="Edit cover">
               ✎
             </button>
           }
@@ -48,10 +48,10 @@
               [value]="coverUrl()"
               (input)="coverUrl.set($any($event.target).value)"
               placeholder="Cover URL"
-              class="min-w-0 flex-1 rounded border border-[var(--color-border)] bg-[var(--color-surface-input)] text-[var(--color-text-primary)] px-2 py-1 text-xs"
+              class="input min-w-0 flex-1 text-xs"
             />
-            <button type="button" (click)="saveCover(year)" class="text-xs text-[var(--color-brand)] font-medium">Save</button>
-            <button type="button" (click)="cancelCoverEdit()" class="text-xs text-[var(--color-text-muted)]">Cancel</button>
+            <button type="button" (click)="saveCover(year)" class="btn btn-ghost text-xs">Save</button>
+            <button type="button" (click)="cancelCoverEdit()" class="btn btn-ghost text-xs">Cancel</button>
           </div>
         }
       </div>

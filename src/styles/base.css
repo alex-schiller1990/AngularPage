@@ -1,0 +1,90 @@
+/* ── Global base ────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: var(--leading-normal);
+  color: var(--color-text-primary);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-bg);
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-brand-subtle);
+  color: var(--color-brand);
+}
+
+/* Focus visible — accessible, branded */
+:focus-visible {
+  outline: none;
+  ring: 2px solid var(--color-brand);
+  ring-offset: 2px;
+  ring-offset-color: var(--color-surface-base);
+}
+
+html.dark :focus-visible {
+  ring-offset-color: var(--color-surface-base);
+}
+
+/* Scrollbar */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+/* Restore browser-like list defaults globally (Tailwind preflight resets them). */
+ul,
+ol {
+  margin: var(--space-4) 0;
+  padding-left: var(--space-6);
+}
+li {
+  margin: var(--space-1) 0;
+}
+p {
+  margin: var(--space-3) 0;
+}
+ul ul,
+ul ol,
+ol ul,
+ol ol {
+  margin: var(--space-2) 0;
+}
