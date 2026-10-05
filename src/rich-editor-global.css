@@ -8,6 +8,27 @@
   color: #000;
 }
 
+/* Restore list styles for editor (Tailwind preflight removes them) */
+.editor-content ul {
+  list-style: disc;
+  margin: 1em 0;
+  padding-inline-start: 40px;
+}
+.editor-content ol {
+  list-style: decimal;
+  margin: 1em 0;
+  padding-inline-start: 40px;
+}
+.editor-content li {
+  display: list-item;
+}
+.editor-content ul ul,
+.editor-content ul ol,
+.editor-content ol ul,
+.editor-content ol ol {
+  margin: 0;
+}
+
 .editor-content .tiptap {
   outline: none;
   min-height: 100px;
