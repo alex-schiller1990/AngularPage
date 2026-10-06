@@ -145,7 +145,7 @@
       @for (anime of filteredAnime(); track anime.id; let index = $index) {
         <a
           [routerLink]="['/anime', anime.title]"
-          class="card card-interactive flex h-full flex-col overflow-hidden animate-fade-in-up"
+          class="card card-interactive flex h-full flex-col overflow-hidden animate-fade-in-up mx-auto max-w-[290px]"
           [class.stagger-1]="index % 6 === 0"
           [class.stagger-2]="index % 6 === 1"
           [class.stagger-3]="index % 6 === 2"
