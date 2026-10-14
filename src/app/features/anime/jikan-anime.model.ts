@@ -1,33 +1,34 @@
-/** Subset of Jikan v4 GET /anime/{id} response used on the detail page. */
+/** Subset of Jikan v4 / Jikan-Edge GET /anime/{id} response used on the detail page. */
 export interface JikanAnimeApiResponse {
-  data: JikanAnimeApiData;
+  data?: JikanAnimeApiData;
 }
 
 export interface JikanAnimeApiData {
-  url: string;
-  titles: { type: string; title: string }[];
-  score: number | null;
-  scored_by: number | null;
-  rank: number | null;
-  popularity: number | null;
-  aired: {
-    from: string | null;
-    to: string | null;
-    prop: {
-      from: JikanAiredDatePart;
-      to: JikanAiredDatePart;
+  url?: string;
+  titles?: { type?: string; title?: string }[];
+  title?: string;
+  score?: number | null;
+  scored_by?: number | null;
+  rank?: number | null;
+  popularity?: number | null;
+  aired?: {
+    from?: string | null;
+    to?: string | null;
+    prop?: {
+      from?: JikanAiredDatePart;
+      to?: JikanAiredDatePart;
     };
   };
-  duration: string | null;
-  source: string | null;
-  genres: { name: string }[];
-  studios: { name: string }[];
+  duration?: string | null;
+  source?: string | null;
+  genres?: { name?: string }[];
+  studios?: { name?: string }[];
 }
 
 export interface JikanAiredDatePart {
-  day: number | null;
-  month: number | null;
-  year: number | null;
+  day?: number | null;
+  month?: number | null;
+  year?: number | null;
 }
 
 /** Mapped view model for the anime-detail template. */

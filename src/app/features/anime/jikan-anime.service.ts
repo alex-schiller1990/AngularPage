@@ -8,7 +8,7 @@ import {
   JikanAnimeView,
 } from './jikan-anime.model';
 
-const JIKAN_ANIME_URL = 'https://api.jikan.moe/v4/anime';
+export const JIKAN_ANIME_URL = 'https://jikan.lucashdo.com/v1/anime';
 
 export interface JikanAnimeCacheEntry {
   data: Signal<JikanAnimeView | null>;
@@ -69,9 +69,13 @@ export class JikanAnimeService {
     item.error.set(null);
     try {
       const response = await firstValueFrom(
-        this.http.get<JikanAnimeApiResponse>(`${JIKAN_ANIME_URL}/${malId}`),
+        this.http.get<JikanAnimeApiResponse | JikanAnimeApiData>(`${JIKAN_ANIME_URL}/${malId}`),
       );
-      item.data.set(mapJikanAnimeToView(response.data));
+      const rawData =
+        response && typeof response === 'object' && 'data' in response && response.data
+          ? response.data
+          : (response as JikanAnimeApiData);
+      item.data.set(mapJikanAnimeToView(rawData));
     } catch {
       item.data.set(null);
       item.error.set('Could not load MyAnimeList data.');
@@ -81,24 +85,49 @@ export class JikanAnimeService {
   }
 }
 
-function mapJikanAnimeToView(data: JikanAnimeApiData): JikanAnimeView {
+export function mapJikanAnimeToView(data: JikanAnimeApiData | null | undefined): JikanAnimeView {
+  if (!data) {
+    return {
+      malUrl: '',
+      synonyms: '',
+      score: null,
+      scoredBy: null,
+      rank: null,
+      popularity: null,
+      airedFrom: null,
+      airedTo: null,
+      duration: null,
+      source: null,
+      genres: [],
+      studios: [],
+    };
+  }
+
+  const titles =
+    data.titles && data.titles.length > 0
+      ? data.titles
+          .map(t => t.title)
+          .filter((t): t is string => Boolean(t))
+          .join(', ')
+      : (data.title ?? '');
+
   return {
-    malUrl: data.url,
-    synonyms: data.titles.map(t => t.title).join(', '),
-    score: data.score,
-    scoredBy: data.scored_by,
-    rank: data.rank,
-    popularity: data.popularity,
-    airedFrom: formatAiredPart(data.aired.prop.from) ?? formatIsoDate(data.aired.from),
-    airedTo: formatAiredPart(data.aired.prop.to) ?? formatIsoDate(data.aired.to),
-    duration: data.duration,
-    source: data.source,
-    genres: data.genres.map(g => g.name),
-    studios: data.studios.map(s => s.name),
+    malUrl: data.url ?? '',
+    synonyms: titles,
+    score: data.score ?? null,
+    scoredBy: data.scored_by ?? null,
+    rank: data.rank ?? null,
+    popularity: data.popularity ?? null,
+    airedFrom: formatAiredPart(data.aired?.prop?.from) ?? formatIsoDate(data.aired?.from ?? null),
+    airedTo: formatAiredPart(data.aired?.prop?.to) ?? formatIsoDate(data.aired?.to ?? null),
+    duration: data.duration ?? null,
+    source: data.source ?? null,
+    genres: (data.genres ?? []).map(g => g.name).filter((n): n is string => Boolean(n)),
+    studios: (data.studios ?? []).map(s => s.name).filter((n): n is string => Boolean(n)),
   };
 }
 
-function formatAiredPart(part: JikanAiredDatePart | undefined): string | null {
+export function formatAiredPart(part: JikanAiredDatePart | undefined): string | null {
   if (!part?.year || !part.month || !part.day) return null;
   return new Date(part.year, part.month - 1, part.day).toLocaleDateString('en-US', {
     month: 'short',
@@ -107,7 +136,7 @@ function formatAiredPart(part: JikanAiredDatePart | undefined): string | null {
   });
 }
 
-function formatIsoDate(iso: string | null): string | null {
+export function formatIsoDate(iso: string | null): string | null {
   if (!iso) return null;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return null;
