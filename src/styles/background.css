@@ -2,6 +2,7 @@
 .bg-layer {
   position: fixed;
   inset: 0;
+  overflow: hidden;
   z-index: var(--z-bg-content);
   pointer-events: none;
   background:

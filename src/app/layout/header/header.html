@@ -1,5 +1,17 @@
-<mat-toolbar class="flex items-center justify-between px-6 bg-[var(--color-surface-base)]/80 border-b border-[var(--color-border)] backdrop-blur-xl sticky top-0 z-[var(--z-sticky)]">
-  <div class="flex items-center gap-6">
+<mat-toolbar class="flex items-center justify-between px-3 md:px-6 bg-[var(--color-surface-base)]/80 border-b border-[var(--color-border)] backdrop-blur-xl sticky top-0 z-[var(--z-sticky)]">
+  <div class="flex items-center gap-2 md:gap-6">
+    <div class="md:hidden">
+      <button mat-icon-button [matMenuTriggerFor]="navMenu" aria-label="Open navigation menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+
+    <mat-menu #navMenu="matMenu">
+      <a mat-menu-item routerLink="/" routerLinkActive="text-[var(--color-brand)] font-semibold" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a mat-menu-item routerLink="/anime" routerLinkActive="text-[var(--color-brand)] font-semibold">Anime</a>
+      <a mat-menu-item routerLink="/games" routerLinkActive="text-[var(--color-brand)] font-semibold">Games</a>
+    </mat-menu>
+
     <span
       class="text-xl text-[var(--color-brand)] font-bold cursor-pointer"
       routerLink="/"
@@ -7,7 +19,7 @@
       Ogromm
     </span>
 
-    <nav class="flex gap-2" aria-label="Main navigation">
+    <nav class="hidden md:flex gap-2" aria-label="Main navigation">
       <a mat-button routerLink="/" routerLinkActive="text-[var(--color-brand)] font-semibold" [routerLinkActiveOptions]="{ exact: true }" class="text-sm font-medium transition-colors hover:text-[var(--color-brand)]">
         Home
       </a>
