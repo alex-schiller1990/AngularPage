@@ -12,9 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Create environment.ts
+        env:
+          ENVIRONMENT_CONTENT: ${{ secrets.ENVIRONMENT_TS }}
         run: |
           mkdir -p src/environments
-          echo "${{ secrets.ENVIRONMENT_TS }}" > src/environments/environment.ts
+          printf '%s\n' "$ENVIRONMENT_CONTENT" > src/environments/environment.ts
       - run: npm ci --legacy-peer-deps && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
