@@ -7,6 +7,12 @@
       "hosting": {
         "testogromm": [
           "testogromm"
+        ],
+        "thong-dat": [
+          "thong-dat"
+        ],
+        "ogromm": [
+          "ogromm"
         ]
       }
     }
