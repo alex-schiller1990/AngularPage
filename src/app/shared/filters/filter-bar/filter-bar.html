@@ -1,0 +1,38 @@
+<div class="relative z-10 mb-6 space-y-4 animate-fade-in-up stagger-3">
+  <div class="relative">
+    <input
+      #searchInput
+      type="text"
+      [value]="searchQuery()"
+      (input)="searchQueryChange.emit(searchInput.value)"
+      placeholder="Search by name or alternative title"
+      class="input pr-20"
+    />
+
+    @if (searchQuery()) {
+      <button
+        type="button"
+        (click)="searchQueryChange.emit('')"
+        class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost text-xs px-2 py-1"
+      >
+        Clear
+      </button>
+    }
+  </div>
+
+  <div #filtersContainer class="flex flex-wrap items-start gap-2">
+    <ng-content />
+
+    @if (searchQuery() || chips().length > 0) {
+      <button type="button" (click)="clearAll.emit()" class="btn btn-secondary">
+        Clear all
+      </button>
+    }
+  </div>
+
+  <app-active-filter-chips [chips]="chips()" (chipRemoved)="chipRemoved.emit($event)" />
+
+  <p class="text-sm text-[var(--color-text-muted)]">
+    {{ resultCount() }} result{{ resultCount() === 1 ? '' : 's' }}
+  </p>
+</div>

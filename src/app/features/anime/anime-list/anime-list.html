@@ -1,4 +1,4 @@
-<div class="p-6 container">
+﻿<div class="p-6 container">
 
   <div class="mb-8 flex flex-wrap items-center justify-between gap-4 animate-fade-in-up stagger-1">
     <h1 class="text-h2 font-semibold">Anime</h1>
@@ -48,164 +48,78 @@
   @if (activeTab() === 'year-review') {
     <app-anime-year-review class="animate-fade-in-up stagger-3" />
   } @else {
-  <div class="relative z-10 mb-6 space-y-4 animate-fade-in-up stagger-3">
-    <div class="relative">
-      <input
-        #searchInput
-        type="text"
-        [value]="searchQuery()"
-        (input)="searchQuery.set(searchInput.value)"
-        placeholder="Search by name or alternative title"
-        class="input pr-20"
-      />
-
-      @if (searchQuery()) {
-        <button
-          type="button"
-          (click)="searchQuery.set(''); searchInput.value = ''"
-          class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost text-xs px-2 py-1"
-        >
-          Clear
-        </button>
-      }
-    </div>
-
-    <div #filtersContainer class="flex flex-wrap items-start gap-2">
+    <app-filter-bar
+      [searchQuery]="searchQuery()"
+      [chips]="activeFilterChips()"
+      [resultCount]="filteredAnime().length"
+      (searchQueryChange)="searchQuery.set($event)"
+      (clearAll)="clearAllFilters()"
+      (chipRemoved)="removeFilterChip($event)"
+    >
       <app-filter-dropdown
         [label]="'Status'"
-        [selectedCount]="getSelectedCount(selectedStatuses())"
+        [selectedCount]="selectedStatuses().size"
         [options]="statusFilterOptions()"
         [panelWidthClass]="'w-56'"
         (optionToggled)="toggleStatus($event)"
-        (dropdownToggled)="onFilterDropdownToggle($event)"
       />
 
       <app-filter-dropdown
         [label]="'Rating'"
-        [selectedCount]="getSelectedCount(selectedRatings())"
+        [selectedCount]="selectedRatings().size"
         [options]="ratingFilterOptions()"
         [panelWidthClass]="'w-40'"
         (optionToggled)="toggleRating($event)"
-        (dropdownToggled)="onFilterDropdownToggle($event)"
       />
 
       <app-filter-dropdown
         [label]="'Release year'"
-        [selectedCount]="getSelectedCount(selectedReleaseYears())"
+        [selectedCount]="selectedReleaseYears().size"
         [options]="releaseYearFilterOptions()"
         [panelWidthClass]="'w-44'"
         (optionToggled)="toggleReleaseYear($event)"
-        (dropdownToggled)="onFilterDropdownToggle($event)"
       />
 
       <app-filter-dropdown
         [label]="'Watched year'"
-        [selectedCount]="getSelectedCount(selectedWatchedYears())"
+        [selectedCount]="selectedWatchedYears().size"
         [options]="watchedYearFilterOptions()"
         [panelWidthClass]="'w-44'"
         (optionToggled)="toggleWatchedYear($event)"
-        (dropdownToggled)="onFilterDropdownToggle($event)"
       />
 
-      @if (
-        searchQuery() ||
-        getSelectedCount(selectedStatuses()) > 0 ||
-        getSelectedCount(selectedRatings()) > 0 ||
-        getSelectedCount(selectedReleaseYears()) > 0 ||
-        getSelectedCount(selectedWatchedYears()) > 0
-      ) {
-        <button
-          type="button"
-          (click)="clearAllFilters(); searchInput.value = ''"
-          class="btn btn-secondary"
-        >
-          Clear all
-        </button>
-      }
-    </div>
+      <app-sort-select
+        [options]="sortOptions"
+        [value]="sortOption()"
+        (valueChange)="sortOption.set($event)"
+      />
+    </app-filter-bar>
 
-    <app-active-filter-chips
-      [chips]="activeFilterChips()"
-      (chipRemoved)="removeFilterChip($event); searchInput.value = searchQuery()"
-    />
-
-    <p class="text-sm text-[var(--color-text-muted)]">
-      {{ filteredAnime().length }} result{{ filteredAnime().length === 1 ? '' : 's' }}
-    </p>
-  </div>
-
-  @if (filteredAnime().length === 0) {
-    <div class="card p-12 text-center animate-fade-in-up stagger-4">
-      <div class="text-4xl mb-4" aria-hidden="true">🎌</div>
-      <h2 class="text-h3 font-semibold text-[var(--color-text-primary)] mb-2">No anime match your search</h2>
-      <p class="text-body text-[var(--color-text-muted)]">Try adjusting your filters or search term.</p>
-    </div>
-  } @else {
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      @for (anime of filteredAnime(); track anime.id; let index = $index) {
-        <a
-          [routerLink]="['/anime', anime.title]"
-          class="card card-interactive flex h-full flex-col overflow-hidden animate-fade-in-up mx-auto max-w-[290px]"
-          [class.stagger-1]="index % 6 === 0"
-          [class.stagger-2]="index % 6 === 1"
-          [class.stagger-3]="index % 6 === 2"
-          [class.stagger-4]="index % 6 === 3"
-          [class.stagger-5]="index % 6 === 4"
-          [class.stagger-6]="index % 6 === 5"
-        >
-          <img
-            [src]="anime.coverURL"
-            [alt]="anime.name"
-            [attr.loading]="index < 4 ? 'eager' : 'lazy'"
-            decoding="async"
-            class="w-full aspect-[290/410] object-cover"
+    @if (filteredAnime().length === 0) {
+      <div class="card p-12 text-center animate-fade-in-up stagger-4">
+        <div class="text-4xl mb-4" aria-hidden="true">🎌</div>
+        <h2 class="text-h3 font-semibold text-[var(--color-text-primary)] mb-2">No anime match your search</h2>
+        <p class="text-body text-[var(--color-text-muted)]">Try adjusting your filters or search term.</p>
+      </div>
+    } @else {
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        @for (anime of filteredAnime(); track anime.id; let index = $index) {
+          <app-list-item-card
+            [link]="['/anime', anime.title]"
+            [coverURL]="anime.coverURL"
+            [coverAspectClass]="'aspect-[290/410]'"
+            [name]="anime.name"
+            [subtitle]="anime.releaseYear"
+            [status]="anime.status"
+            [progress]="anime.progress"
+            [startDate]="anime.startDate"
+            [endDate]="anime.endDate"
+            [rating]="anime.rating"
+            [index]="index"
           />
-
-          <div class="flex h-full flex-col p-5 text-center">
-            <h2 class="text-body font-semibold leading-snug">
-              {{ anime.name }}
-            </h2>
-
-            <p class="mt-1 text-sm text-[var(--color-text-muted)]">
-              {{ anime.releaseYear }}
-            </p>
-
-            <div class="mt-auto space-y-2 pt-3">
-              <p class="flex items-center justify-between gap-3 text-sm">
-                <span
-                  [class]="getStatusBadgeClasses(anime.status)"
-                >
-                  {{ formatStatusLabel(anime.status) }}
-                </span>
-                <span class="font-mono">{{ anime.progress }}</span>
-              </p>
-
-              <p class="text-sm text-[var(--color-text-muted)]">
-                {{ anime.startDate }}{{ anime.endDate ? ' – ' + anime.endDate : '' }}
-              </p>
-
-              <p class="text-sm">
-                <span
-                  [class]="getRatingBadgeClasses(anime.rating)"
-                >
-                  @if (isPerfectRating(anime.rating)) {
-                    ✨
-                  } @else {
-                    ⭐
-                  }
-                  @if (anime.rating) {
-                    {{ anime.rating }}/10
-                  } @else {
-                    No rating
-                  }
-                </span>
-              </p>
-            </div>
-          </div>
-        </a>
-      }
-    </div>
-  }
+        }
+      </div>
+    }
   }
 
 </div>

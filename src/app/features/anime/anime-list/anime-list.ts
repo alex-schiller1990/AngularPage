@@ -1,8 +1,7 @@
-import { Component, computed, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth/auth.service';
-import { getNewestDateTimestamp } from '../../../core/date-sort.utils';
 import {
   accumulateFacetCounts,
   collectYearsFromMap,
@@ -13,22 +12,28 @@ import {
   removeValueFromSet,
   toggleValueInSet
 } from '../../../core/filter.utils';
-import {
-  formatStatusLabel as sharedFormatStatusLabel,
-  getStatusBadgeClasses as getSharedStatusBadgeClasses,
-  getRatingBadgeClasses as getSharedRatingBadgeClasses,
-  isPerfectRating as isSharedPerfectRating
-} from '../../../shared/badge-styles.utils';
-import { ActiveFilterChipsComponent } from '../../../shared/filters/active-filter-chips/active-filter-chips';
+import { SORT_OPTIONS, SortOption, sortItems } from '../../../core/sort.utils';
+import { formatStatusLabel } from '../../../shared/badge-styles.utils';
+import { FilterBarComponent } from '../../../shared/filters/filter-bar/filter-bar';
 import { FilterDropdownComponent } from '../../../shared/filters/filter-dropdown/filter-dropdown';
-import { ActiveFilterChip, FilterOption } from '../../../shared/filters/filter.models';
+import { toFilterOptions } from '../../../shared/filters/filter-options.utils';
+import { ActiveFilterChip } from '../../../shared/filters/filter.models';
+import { SortSelectComponent } from '../../../shared/filters/sort-select/sort-select';
+import { ListItemCardComponent } from '../../../shared/list-item-card/list-item-card';
 import { AnimeService } from '../anime.service';
 import { Anime } from '../anime.model';
 import { AnimeYearReview } from '../anime-year-review/anime-year-review';
 
 @Component({
   selector: 'app-anime-list',
-  imports: [RouterLink, FilterDropdownComponent, ActiveFilterChipsComponent, AnimeYearReview],
+  imports: [
+    RouterLink,
+    FilterBarComponent,
+    FilterDropdownComponent,
+    SortSelectComponent,
+    ListItemCardComponent,
+    AnimeYearReview
+  ],
   templateUrl: './anime-list.html',
   styleUrl: './anime-list.css',
   standalone: true
@@ -45,17 +50,15 @@ export class AnimeList {
     this.queryParamMap().get('tab') === 'year-review' ? 'year-review' : 'list'
   );
   protected readonly searchQuery = signal('');
-  protected readonly filtersContainer = viewChild<ElementRef<HTMLElement>>('filtersContainer');
   protected readonly selectedStatuses = signal<Set<string>>(new Set());
   protected readonly selectedRatings = signal<Set<string>>(new Set());
   protected readonly selectedReleaseYears = signal<Set<string>>(new Set());
   protected readonly selectedWatchedYears = signal<Set<string>>(new Set());
+  protected readonly sortOption = signal<SortOption>('date-desc');
+  protected readonly sortOptions = SORT_OPTIONS;
 
-  /** Anime sorted by newest date (last watched) descending; unknown dates last. */
-  protected readonly sortedAnime = computed(() => {
-    const list = this.animeService.list();
-    return [...list].sort((a: Anime, b: Anime) => getNewestDateTimestamp(b) - getNewestDateTimestamp(a));
-  });
+  /** Anime sorted by the selected sort option (default: newest date first). */
+  protected readonly sortedAnime = computed(() => sortItems(this.animeService.list(), this.sortOption()));
 
   private readonly watchedYearsByAnimeId = computed(() => {
     const map = new Map<string, Set<string>>();
@@ -68,57 +71,38 @@ export class AnimeList {
   private readonly releaseYearsByAnimeId = computed(() => {
     const map = new Map<string, Set<string>>();
     for (const anime of this.sortedAnime()) {
-      map.set(anime.id, this.getReleaseYears(anime));
+      map.set(anime.id, expandYearRange(anime.releaseYear));
     }
     return map;
   });
 
-  protected readonly statusOptions = computed(() =>
+  private readonly statusOptions = computed(() =>
     getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.status))
   );
-  protected readonly ratingOptions = computed(() =>
+  private readonly ratingOptions = computed(() =>
     getSortedUniqueValues(this.sortedAnime().map((anime: Anime) => anime.rating), true)
   );
+  private readonly releaseYearOptions = computed(() => collectYearsFromMap(this.releaseYearsByAnimeId()));
+  private readonly watchedYearOptions = computed(() => collectYearsFromMap(this.watchedYearsByAnimeId()));
 
-  protected readonly releaseYearOptions = computed(() => collectYearsFromMap(this.releaseYearsByAnimeId()));
+  protected readonly statusFilterOptions = computed(() =>
+    toFilterOptions(
+      this.statusOptions(),
+      this.getFacetCounts('status'),
+      this.selectedStatuses(),
+      formatStatusLabel
+    )
+  );
+  protected readonly ratingFilterOptions = computed(() =>
+    toFilterOptions(this.ratingOptions(), this.getFacetCounts('rating'), this.selectedRatings())
+  );
+  protected readonly releaseYearFilterOptions = computed(() =>
+    toFilterOptions(this.releaseYearOptions(), this.getFacetCounts('releaseYear'), this.selectedReleaseYears())
+  );
+  protected readonly watchedYearFilterOptions = computed(() =>
+    toFilterOptions(this.watchedYearOptions(), this.getFacetCounts('watchedYear'), this.selectedWatchedYears())
+  );
 
-  protected readonly watchedYearOptions = computed(() => collectYearsFromMap(this.watchedYearsByAnimeId()));
-  protected readonly statusFacetCounts = computed(() => this.getFacetCounts('status'));
-  protected readonly ratingFacetCounts = computed(() => this.getFacetCounts('rating'));
-  protected readonly releaseYearFacetCounts = computed(() => this.getFacetCounts('releaseYear'));
-  protected readonly watchedYearFacetCounts = computed(() => this.getFacetCounts('watchedYear'));
-  protected readonly statusFilterOptions = computed<FilterOption[]>(() =>
-    this.statusOptions().map((status) => ({
-      value: status,
-      label: this.formatStatusLabel(status),
-      count: this.statusFacetCounts().get(status) ?? 0,
-      selected: this.selectedStatuses().has(status)
-    }))
-  );
-  protected readonly ratingFilterOptions = computed<FilterOption[]>(() =>
-    this.ratingOptions().map((rating) => ({
-      value: rating,
-      label: rating,
-      count: this.ratingFacetCounts().get(rating) ?? 0,
-      selected: this.selectedRatings().has(rating)
-    }))
-  );
-  protected readonly releaseYearFilterOptions = computed<FilterOption[]>(() =>
-    this.releaseYearOptions().map((releaseYear) => ({
-      value: releaseYear,
-      label: releaseYear,
-      count: this.releaseYearFacetCounts().get(releaseYear) ?? 0,
-      selected: this.selectedReleaseYears().has(releaseYear)
-    }))
-  );
-  protected readonly watchedYearFilterOptions = computed<FilterOption[]>(() =>
-    this.watchedYearOptions().map((watchedYear) => ({
-      value: watchedYear,
-      label: watchedYear,
-      count: this.watchedYearFacetCounts().get(watchedYear) ?? 0,
-      selected: this.selectedWatchedYears().has(watchedYear)
-    }))
-  );
   protected readonly activeFilterChips = computed<ActiveFilterChip[]>(() => {
     const chips: ActiveFilterChip[] = [];
     const query = this.searchQuery().trim();
@@ -127,7 +111,7 @@ export class AnimeList {
     }
 
     for (const status of Array.from(this.selectedStatuses()).sort((a, b) => a.localeCompare(b))) {
-      chips.push({ type: 'status', value: status, label: `Status: ${this.formatStatusLabel(status)}` });
+      chips.push({ type: 'status', value: status, label: `Status: ${formatStatusLabel(status)}` });
     }
     for (const rating of Array.from(this.selectedRatings()).sort((a, b) => Number(b) - Number(a))) {
       chips.push({ type: 'rating', value: rating, label: `Rating: ${rating}` });
@@ -166,10 +150,6 @@ export class AnimeList {
     this.selectedWatchedYears.update((selected) => toggleValueInSet(selected, value));
   }
 
-  protected getSelectedCount(values: Set<string>): number {
-    return values.size;
-  }
-
   protected refreshList(): void {
     this.animeService.refreshList();
   }
@@ -204,49 +184,6 @@ export class AnimeList {
     }
 
     this.selectedWatchedYears.update((selected) => removeValueFromSet(selected, chip.value));
-  }
-
-  protected formatStatusLabel(status: string): string {
-    return sharedFormatStatusLabel(status);
-  }
-
-  protected getStatusBadgeClasses(status: string): string {
-    return getSharedStatusBadgeClasses(status);
-  }
-
-  protected getRatingBadgeClasses(rating: string | null | undefined): string {
-    return getSharedRatingBadgeClasses(rating);
-  }
-
-  protected isPerfectRating(rating: string | null | undefined): boolean {
-    return isSharedPerfectRating(rating);
-  }
-
-  @HostListener('document:click', ['$event'])
-  protected onDocumentClick(event: MouseEvent): void {
-    const container = this.filtersContainer()?.nativeElement;
-    const target = event.target as Node | null;
-    if (!container || !target || container.contains(target)) return;
-    this.closeOpenFilterDropdowns();
-  }
-
-  @HostListener('document:keydown.escape')
-  protected onEscapeKey(): void {
-    this.closeOpenFilterDropdowns();
-  }
-
-  protected onFilterDropdownToggle(event: Event): void {
-    const openedDropdown = event.currentTarget as HTMLDetailsElement | null;
-    if (!openedDropdown?.open) return;
-
-    const container = this.filtersContainer()?.nativeElement;
-    if (!container) return;
-
-    for (const detailElement of container.querySelectorAll('details[open]')) {
-      if (detailElement !== openedDropdown) {
-        detailElement.removeAttribute('open');
-      }
-    }
   }
 
   private getFacetCounts(
@@ -318,18 +255,5 @@ export class AnimeList {
         endDate: additionalDate.endDate
       }))
     ]);
-  }
-
-  private getReleaseYears(anime: Anime): Set<string> {
-    return expandYearRange(anime.releaseYear);
-  }
-
-  private closeOpenFilterDropdowns(): void {
-    const container = this.filtersContainer()?.nativeElement;
-    if (!container) return;
-
-    for (const detailElement of container.querySelectorAll('details[open]')) {
-      detailElement.removeAttribute('open');
-    }
   }
 }

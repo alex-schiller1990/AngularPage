@@ -13,13 +13,8 @@ export class FilterDropdownComponent {
   readonly panelWidthClass = input('w-52');
 
   readonly optionToggled = output<string>();
-  readonly dropdownToggled = output<Event>();
 
   protected onOptionChange(value: string): void {
     this.optionToggled.emit(value);
-  }
-
-  protected onToggle(event: Event): void {
-    this.dropdownToggled.emit(event);
   }
 }

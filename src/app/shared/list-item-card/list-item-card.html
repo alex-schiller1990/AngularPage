@@ -1,0 +1,61 @@
+<a
+  [routerLink]="link()"
+  class="card card-interactive flex h-full flex-col overflow-hidden animate-fade-in-up mx-auto max-w-[290px]"
+  [class.stagger-1]="index() % 6 === 0"
+  [class.stagger-2]="index() % 6 === 1"
+  [class.stagger-3]="index() % 6 === 2"
+  [class.stagger-4]="index() % 6 === 3"
+  [class.stagger-5]="index() % 6 === 4"
+  [class.stagger-6]="index() % 6 === 5"
+>
+  <img
+    [src]="coverURL()"
+    [alt]="name()"
+    [attr.loading]="index() < 4 ? 'eager' : 'lazy'"
+    decoding="async"
+    class="w-full object-cover"
+    [class]="coverAspectClass()"
+  />
+
+  <div class="flex h-full flex-col p-5 text-center">
+    <h2 class="text-body font-semibold leading-snug">
+      {{ name() }}
+    </h2>
+
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+      {{ subtitle() }}
+    </p>
+
+    <div class="mt-auto space-y-2 pt-3">
+      <p class="flex items-center justify-between gap-3 text-sm">
+        <span [class]="statusClasses()">
+          {{ statusLabel() }}
+        </span>
+        @if (progress()) {
+          <span class="font-mono">{{ progress() }}</span>
+        } @else {
+          <span class="font-mono text-[var(--color-text-muted)]">-</span>
+        }
+      </p>
+
+      <p class="text-sm text-[var(--color-text-muted)]">
+        {{ startDate() }}{{ endDate() ? ' – ' + endDate() : '' }}
+      </p>
+
+      <p class="text-sm">
+        <span [class]="ratingClasses()">
+          @if (isPerfect()) {
+            ✨
+          } @else {
+            ⭐
+          }
+          @if (rating()) {
+            {{ rating() }}/10
+          } @else {
+            No rating
+          }
+        </span>
+      </p>
+    </div>
+  </div>
+</a>
